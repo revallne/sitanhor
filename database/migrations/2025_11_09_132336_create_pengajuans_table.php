@@ -17,14 +17,16 @@ return new class extends Migration
             $table->year('periode_tahun');
             $table->integer('kategori_kode_kategori');
             // $table->unsignedBigInteger('surat_tanda_kehormatan_id')->nullable();
-            $table->string('suratTandaKehormatan')->nullable();
-            $table->date('tanggalPengajuan');
-            $table->string('namaFile_SK_TMT');
-            $table->string('pathFile_SK_TMT');
-            $table->string('namaFile_SK_pangkat');
-            $table->string('pathFile_SK_pangkat');
-            $table->string('namaFile_SK_jabatan');
-            $table->string('pathFile_SK_jabatan');
+            $table->string('surat_tanda_Kehormatan')->nullable();
+            $table->date('tanggal_pengajuan');
+           // $table->string('namaFile_SK_TMT');
+            $table->string('sk_TMT');
+            //$table->string('namaFile_SK_pangkat');
+            $table->string('sk_pangkat');
+            //$table->string('namaFile_SK_jabatan');
+            $table->string('sk_jabatan');
+            //$table->string('namaFile_drh');
+            $table->string('drh');
             $table->string('status')->default('Menunggu Verifikasi');
             $table->text('catatan')->nullable();
 

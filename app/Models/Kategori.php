@@ -10,7 +10,7 @@ class Kategori extends Model
     public $incrementing = false;
     public $timestamps = false;
 
-    protected $fillable = ['kode_kategori', 'namaKategori', 'syaratMasaDinas'];
+    protected $fillable = ['kode_kategori', 'nama_kategori', 'syarat_masa_dinas'];
 
     public function pengajuans() {
         return $this->hasMany(Pengajuan::class, 'kategori_kode_kategori', 'kode_Kategori');
