@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('satkers', function (Blueprint $table) {
             $table->integer('kode_satker')->primary();
+            $table->string('nama_satker')->unique();
 
             // Menambahkan Foreign Key ke Users via email
             // Pastikan kolom 'email' di tabel 'users' sudah unique

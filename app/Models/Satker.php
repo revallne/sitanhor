@@ -15,6 +15,7 @@ class Satker extends Model
 
     protected $fillable = [
         'kode_satker',
+        'nama_satker',
         'user_email',
         'deskripsi',
     ];

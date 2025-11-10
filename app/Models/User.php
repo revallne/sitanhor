@@ -35,6 +35,16 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function personel()
+    {
+        return $this->hasOne(Personel::class, 'user_email', 'email');
+    }
+
+        public function satker()
+    {
+        return $this->hasOne(Satker::class, 'user_email', 'email');
+    }
+
     /**
      * Get the attributes that should be cast.
      *

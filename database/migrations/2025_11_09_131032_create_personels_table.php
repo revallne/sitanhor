@@ -31,8 +31,9 @@ return new class extends Migration
             $table->string('pangkat');
             $table->string('jabatan');
             $table->string('tempat_lahir'); // tempatLahir
-            
+            $table->date('tanggal_lahir'); // tanggalLahir
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
