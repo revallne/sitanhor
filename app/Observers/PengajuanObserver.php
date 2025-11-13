@@ -10,9 +10,17 @@ class PengajuanObserver
     {
         $user = auth()->user();
 
-    if ($user && $user->personel) {
-        $pengajuan->personel_nrp = $user->personel->nrp;
-    }
+        if ($user && $user->personel) {
+            $pengajuan->personel_nrp = $user->personel->nrp;
+        }
+        $exists = Pengajuan::where('personel_nrp', $pengajuan->personel_nrp)
+            ->where('periode_tahun', $pengajuan->periode_tahun)
+            ->where('kategori_kode_kategori', $pengajuan->kategori_kode_kategori)
+            ->exists();
+
+        if ($exists) {
+            throw new \Exception('Anda sudah memiliki pengajuan untuk periode dan kategori ini.');
+        }
     }
     /**
      * Handle the Pengajuan "created" event.

@@ -16,12 +16,14 @@ return new class extends Migration
             $table->unsignedBigInteger('pengajuan_id');
             $table->string('noKepres');
             $table->date('tanggalKepres');
-            $table->string('namaFile');
-            $table->string('pathFile');
+            $table->string('file_surat');
+            // $table->string('namaFile');
+            // $table->string('pathFile');
             //$table->date('tanggalUpload');
 
             $table->foreign('pengajuan_id')->references('id')->on('pengajuans')->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

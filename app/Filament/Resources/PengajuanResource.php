@@ -17,6 +17,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Filament\Actions;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PengajuanResource extends Resource
 {
@@ -28,17 +29,17 @@ class PengajuanResource extends Resource
     {
         return $form
             ->schema([
-                // Forms\Components\TextInput::make('personel_nrp')
-                //     ->label('NRP')
-                //     ->required()
-                //     ->maxLength(15),
-                Forms\Components\TextInput::make('periode_tahun')
-                    ->label('Tahun Periode')
-                    ->numeric()
-                    ->minValue(2000)
-                    ->maxValue(date('Y') + 1)
-                    ->required()
-                    ->rule('digits:4')
+                Forms\Components\Select::make('periode_tahun')
+                    ->label('Periode Tahun')
+                    ->options(
+                        \App\Models\Periode::where('status', 'buka')
+                            ->pluck('tahun', 'tahun')
+                    )
+                    ->default(
+                        \App\Models\Periode::where('status', 'buka')
+                            ->latest('tahun')
+                            ->value('tahun')
+                    )
                     ->required(),
                 Forms\Components\Select::make('kategori_kode_kategori')
                     ->label('Tanda Kehormatan')
@@ -46,9 +47,22 @@ class PengajuanResource extends Resource
                     ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nama_kategori} ({$record->syarat_masa_dinas} Tahun)")
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->rule(function ($get) {
+                        return function (string $attribute, $value, $fail) use ($get) {
+                            $exists = Pengajuan::where('personel_nrp', auth()->user()->personel_nrp)
+                                ->where('periode_tahun', $get('periode_tahun'))
+                                ->where('kategori_kode_kategori', $value)
+                                ->exists();
+
+                            if ($exists) {
+                                $fail('Anda sudah mengajukan kategori ini pada periode tersebut.');
+                            }
+                        };
+                    }),
                 Forms\Components\TextInput::make('surat_tanda_kehormatan')
-                    ->label('Tanda Kehormatan yang Sudah Dimiliki')
+                    ->label('Nomor dan Tanggal Keppres Nomor Tanda Kehormatan Terakhir')
+                    ->helperText('Contoh: Keppres Nomor 39/TK/TAHUN 2021 tanggal 1 Januari 2021')
                     ->maxLength(255)
                     ->default(null),
                 Forms\Components\Hidden::make('tanggal_pengajuan')
@@ -122,6 +136,7 @@ class PengajuanResource extends Resource
                             . $file->getClientOriginalExtension()       // ambil ekstensi file asli
                         ),
                     ),
+                    
                 // Forms\Components\TextInput::make('status')
                 //     ->required()
                 //     ->maxLength(255)
@@ -141,32 +156,33 @@ class PengajuanResource extends Resource
                 Tables\Columns\TextColumn::make('kategori_kode_kategori')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('suratTandaKehormatan')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('tanggalPengajuan')
+                Tables\Columns\TextColumn::make('surat_tanda_kehormatan'),
+                Tables\Columns\TextColumn::make('tanggal_pengajuan')
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sk_tmt')
-                    ->searchable(),
+                    ->label('SK TMT Pertama')
+                    ->url(fn ($record) => asset('storage/' . $record->sk_tmt)) // arahkan ke lokasi file di public/storage
+                    ->openUrlInNewTab() // buka di tab baru
+                    ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
                 Tables\Columns\TextColumn::make('sk_pangkat')
-                    ->searchable(),
+                    ->label('SK Pangkat Terakhir')
+                    ->url(fn ($record) => asset('storage/' . $record->sk_pangkat)) // arahkan ke lokasi file di public/storage
+                    ->openUrlInNewTab() // buka di tab baru
+                    ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
                 Tables\Columns\TextColumn::make('sk_jabatan')
-                    ->searchable(),
+                    ->label('SK Jabatan Terakhir')
+                    ->url(fn ($record) => asset('storage/' . $record->sk_jabatan)) // arahkan ke lokasi file di public/storage
+                    ->openUrlInNewTab() // buka di tab baru
+                    ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
                 Tables\Columns\TextColumn::make('drh')
-                    ->searchable(),
-                // Tables\Columns\TextColumn::make('namaFile_SK_TMT')
-                //     ->searchable(),
-                // Tables\Columns\TextColumn::make('pathFile_SK_TMT')
-                //     ->searchable(),
-                // Tables\Columns\TextColumn::make('namaFile_SK_pangkat')
-                //     ->searchable(),
-                // Tables\Columns\TextColumn::make('pathFile_SK_pangkat')
-                //     ->searchable(),
-                // Tables\Columns\TextColumn::make('namaFile_SK_jabatan')
-                //     ->searchable(),
-                // Tables\Columns\TextColumn::make('pathFile_SK_jabatan')
-                    // ->searchable(),
+                    ->label('Daftar Riwayat Hidup')
+                    ->url(fn ($record) => asset('storage/' . $record->drh)) // arahkan ke lokasi file di public/storage
+                    ->openUrlInNewTab() // buka di tab baru
+                    ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
                 Tables\Columns\TextColumn::make('status')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('suratTandaKehormatan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
