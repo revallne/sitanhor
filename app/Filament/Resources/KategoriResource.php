@@ -17,19 +17,26 @@ class KategoriResource extends Resource
 {
     protected static ?string $model = Kategori::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-trophy';
+
+    protected static ?string $pluralModelLabel = 'Kategori Tanda Kehormatan';
+
+    protected static ?string $modelLabel = 'Tanhor';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('kode_kategori')
+                    ->label('Kode')
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('namaKategori')
+                    ->label('Nama Tanda Kehormatan')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('syaratMasaDinas')
+                    ->label('Syarat Masa Dinas (dalam tahun)')
                     ->required()
                     ->numeric(),
             ]);
@@ -40,13 +47,13 @@ class KategoriResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('kode_kategori')
-                    ->label('Kode Kategori')
+                    ->label('Kode')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('namaKategori')
-                    ->label('Nama Kategori')
+                Tables\Columns\TextColumn::make('nama_kategori')
+                    ->label('Nama Tanda Kehormatan')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('syaratMasaDinas')
+                Tables\Columns\TextColumn::make('syarat_masa_dinas')
                     ->label('Syarat Masa Dinas')
                     ->numeric()
                     ->sortable(),

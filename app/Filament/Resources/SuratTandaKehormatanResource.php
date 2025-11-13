@@ -19,14 +19,18 @@ class SuratTandaKehormatanResource extends Resource
 {
     protected static ?string $model = SuratTandaKehormatan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-check';
+    
+    protected static ?string $pluralModelLabel = 'Surat Tanda Kehormatan';
+
+    protected static ?string $modelLabel = 'Surat Tanhor';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('nrp')
-                    ->label('NRP Personel')
+                    ->label('NRP Penerima')
                     ->required()
                     ->maxLength(20),
 
@@ -36,16 +40,18 @@ class SuratTandaKehormatanResource extends Resource
                     ->required(),
 
                 Forms\Components\Select::make('kategori_kode_kategori')
-                    ->label('Kategori')
+                    ->label('Tanda Kehormatan')
                     ->relationship('pengajuan.kategori', 'nama_kategori')
                     ->required(),
 
                 Forms\Components\Hidden::make('pengajuan_id'),
 
                 Forms\Components\TextInput::make('noKepres')
+                    ->label('Nomor Keppres')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\DatePicker::make('tanggalKepres')
+                    ->label('Tanggal Keppres')
                     ->required(),
                 Forms\Components\FileUpload::make('file_surat')
                     ->required()
@@ -73,20 +79,24 @@ class SuratTandaKehormatanResource extends Resource
                 // Ambil field dari relasi pengajuan
                 Tables\Columns\TextColumn::make('pengajuan.personel_nrp')
                     ->label('NRP')
-                    ->searchable(),
-
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('pengajuan.personel.user.name')
+                    ->label('Nama')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('pengajuan.periode_tahun')
                     ->label('Periode')
                     ->sortable(),
-
                 Tables\Columns\TextColumn::make('pengajuan.kategori.nama_kategori')
                     ->label('Kategori')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('noKepres')
+                    ->label('Nomor Keppres')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('tanggalKepres')
-                    ->date()
-                    ->sortable(),
+                    ->label('Tanggal Keppres')
+                    ->date(),
                 Tables\Columns\TextColumn::make('file_surat')
                     ->label('File Surat')
                     ->url(fn ($record) => asset('storage/' . $record->file_surat)) // arahkan ke lokasi file di public/storage

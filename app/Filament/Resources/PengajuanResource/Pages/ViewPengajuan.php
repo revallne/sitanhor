@@ -16,4 +16,5 @@ class ViewPengajuan extends ViewRecord
             Actions\EditAction::make(),
         ];
     }
+    
 }

@@ -12,12 +12,17 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class PersonelResource extends Resource
 {
     protected static ?string $model = Personel::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
+
+    protected static ?string $pluralModelLabel = 'Personel';
+
+    protected static ?string $modelLabel = 'Personel';
 
     public static function form(Form $form): Form
     {
@@ -28,19 +33,15 @@ class PersonelResource extends Resource
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('user_email')
+                    ->label('Email Terdaftar')
                     ->email()
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('user_name')
-                    ->label('Nama Personel')
-                    ->reactive()
-                    //->required()
-                    ->afterStateUpdated(function ($state, callable $get) {
-                        $email = $get('user_email');
-                        if ($email) {
-                            \App\Models\User::where('email', $email)->update(['name' => $state]);
-                        }
-                    })
+                    ->label('Nama Lengkap')
+                    ->required()
+                    ->default(fn () => Auth::user()->name) // otomatis isi dari user login
+                    ->disabled() // tidak bisa diubah sama sekali
                     ->dehydrated(false),
                 Forms\Components\Select::make('kode_satker')
                     ->label('Satuan Kerja')
@@ -53,6 +54,7 @@ class PersonelResource extends Resource
                 //     ->required()
                 //     ->numeric(),
                 Forms\Components\DatePicker::make('tmt_pertama')
+                    ->label('TMT Pertama')
                     ->required(),
                 Forms\Components\TextInput::make('pangkat')
                     ->required()
@@ -61,9 +63,11 @@ class PersonelResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('tempat_lahir')
+                    ->label('Tempat Lahir')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\DatePicker::make('tanggal_lahir')
+                    ->label('Tanggal Lahir')
                     ->required(),
             ]);
     }
@@ -73,6 +77,7 @@ class PersonelResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nrp')
+                    ->label('NRP')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('user_email')
                     ->label('Email')
@@ -80,21 +85,23 @@ class PersonelResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Nama')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('kode_satker')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('satker.nama_satker')
+                    ->label('Satuan Kerja')
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tmt_pertama')
+                    ->label('TMT Pertama')
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pangkat')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('jabatan')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('tempat_lahir')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('tanggal_lahir')
-                    ->date()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('ttl')
+                    ->label('Tempat, Tanggal Lahir')
+                    ->getStateUsing(fn ($record) => 
+                        "{$record->tempat_lahir}, " . \Carbon\Carbon::parse($record->tanggal_lahir)->format('Y-m-d')
+                    ),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

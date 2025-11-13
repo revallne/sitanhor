@@ -17,19 +17,27 @@ class SatkerResource extends Resource
 {
     protected static ?string $model = Satker::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
+    protected static ?string $pluralModelLabel = 'Satuan Kerja';
+
+    protected static ?string $modelLabel = 'Satuan Kerja';
+
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('kode_satker')
+                    ->label('Kode Satuan Kerja')
                     ->numeric()
                     ->required(),
                 Forms\Components\TextInput::make('nama_satker')
+                    ->label('Nama Satuan Kerja')
                     ->required()
                     ->maxLength(50),
                 Forms\Components\TextInput::make('user_email')
+                    ->label('Email Akun Satuan Kerja')
                     ->email()
                     ->required()
                     ->maxLength(255),
@@ -44,11 +52,14 @@ class SatkerResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('kode_satker')
+                    ->label('Kode')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('nama_satker')
+                    ->label('Nama Satuan Kerja')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('user_email')
+                    ->label('Akun')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('deskripsi')
                     ->searchable(),

@@ -27,6 +27,7 @@ class SitanhorPanelProvider extends PanelProvider
             ->default()
             ->id('sitanhor')
             ->path('sitanhor')
+            ->brandName('SITANHOR')
             ->login()
             ->colors([
                 'primary' => Color::Amber,

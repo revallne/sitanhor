@@ -17,7 +17,11 @@ class PeriodeResource extends Resource
 {
     protected static ?string $model = Periode::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
+
+    protected static ?string $pluralModelLabel = 'Periode';
+
+    protected static ?string $modelLabel = 'Periode';
 
     public static function form(Form $form): Form
     {
@@ -35,6 +39,13 @@ class PeriodeResource extends Resource
                 Forms\Components\DatePicker::make('tanggalAkhir')
                     ->label('Tanggal Selesai')
                     ->required(),
+                Forms\Components\Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        'buka' => 'Buka',
+                        'tutup' => 'Tutup',
+                    ])
+                    ->required(),
             ]);
     }
 
@@ -44,11 +55,14 @@ class PeriodeResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('tahun'),
                 Tables\Columns\TextColumn::make('tanggalAwal')
+                    ->label('Tanggal Mulai')
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tanggalAkhir')
+                    ->label('Tanggal Selesai')
                     ->date()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('status'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

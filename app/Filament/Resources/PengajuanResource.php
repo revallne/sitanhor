@@ -23,7 +23,11 @@ class PengajuanResource extends Resource
 {
     protected static ?string $model = Pengajuan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
+    protected static ?string $pluralModelLabel = 'Pengajuan';
+
+    protected static ?string $modelLabel = 'Pengajuan';
 
     public static function form(Form $form): Form
     {
@@ -151,13 +155,24 @@ class PengajuanResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('personel_nrp')
+                    ->label('NRP')
+                    ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('periode_tahun'),
-                Tables\Columns\TextColumn::make('kategori_kode_kategori')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('personel.user.name')
+                    ->label('Nama')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('periode_tahun')
+                    ->label('Periode')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('surat_tanda_kehormatan'),
+                Tables\Columns\TextColumn::make('kategori.nama_kategori')
+                    ->label('Tanda Kehormatan')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('surat_tanda_kehormatan')
+                    ->label('Nomor dan Tanggal Keppres')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('tanggal_pengajuan')
+                    ->label('Tanggal Pengajuan')
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sk_tmt')
@@ -182,8 +197,8 @@ class PengajuanResource extends Resource
                     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
                 Tables\Columns\TextColumn::make('status')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('suratTandaKehormatan')
-                    ->searchable(),
+                // Tables\Columns\TextColumn::make('suratTandaKehormatan')
+                //     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
