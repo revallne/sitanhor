@@ -15,6 +15,7 @@ return new class extends Migration
             $table->year('tahun')->primary();
             $table->date('tanggalAwal');
             $table->date('tanggalAkhir');
+            $table->enum('status', ['Buka', 'Tutup'])->default('Buka');
             $table->timestamps();
         });
     }

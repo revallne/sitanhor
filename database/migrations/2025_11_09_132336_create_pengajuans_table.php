@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('sk_jabatan');
             //$table->string('namaFile_drh');
             $table->string('drh');
-            $table->string('status')->default('Menunggu Verifikasi');
+            $table->string('status')->default('Menunggu Verifikasi'); // Menunggu Verifikasi, Terverifikasi, Proses Pengajuan, Selesai, Ditolak
             $table->text('catatan')->nullable();
 
             $table->foreign('personel_nrp')->references('nrp')->on('personels')->onDelete('cascade');

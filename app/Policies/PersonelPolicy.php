@@ -13,7 +13,7 @@ class PersonelPolicy
      */
     public function viewAny(User $user): bool
     {
-         return auth()->user()->hasRole('bagwatpers');
+        return true;
     }
 
     /**
@@ -29,7 +29,7 @@ class PersonelPolicy
      */
     public function create(User $user): bool
     {
-         return auth()->user()->hasRole('bagwatpers');
+         return true;
     }
 
     /**

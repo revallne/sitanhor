@@ -247,9 +247,31 @@ class PengajuanResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        // Role RENMIN → hanya lihat pengajuan dari personel yang satkernya sama
+        if ($user->hasRole('renmin')) {
+
+            // Cari satker yang dipegang oleh renmin ini via user_email
+            $satker = \App\Models\Satker::where('user_email', $user->email)->first();
+
+            if ($satker) {
+                $query->whereHas('personel', function ($q) use ($satker) {
+                    $q->where('kode_satker', $satker->kode_satker);
+                });
+            }
+        }
+
+        // Role PERSONEL → hanya lihat pengajuan miliknya sendiri
+        if ($user->hasRole('personel')) {
+            $nrp = $user->personel->nrp ?? null;
+
+            if ($nrp) {
+                $query->where('personel_nrp', $nrp);
+            }
+        }
+
+        return $query;
     }
 }

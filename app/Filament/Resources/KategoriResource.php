@@ -31,11 +31,11 @@ class KategoriResource extends Resource
                     ->label('Kode')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('namaKategori')
+                Forms\Components\TextInput::make('nama_kategori')
                     ->label('Nama Tanda Kehormatan')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('syaratMasaDinas')
+                Forms\Components\TextInput::make('syarat_masa_dinas')
                     ->label('Syarat Masa Dinas (dalam tahun)')
                     ->required()
                     ->numeric(),
