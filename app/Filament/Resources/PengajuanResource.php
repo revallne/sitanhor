@@ -18,6 +18,11 @@ use Filament\Actions;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Notifications\Notification;
+use League\CommonMark\Xml\FallbackNodeXmlRenderer;
+use Symfony\Component\Routing\Matcher\Dumper\StaticPrefixCollection;
+use Illuminate\Support\Collection;
 
 class PengajuanResource extends Resource
 {
@@ -28,6 +33,11 @@ class PengajuanResource extends Resource
     protected static ?string $pluralModelLabel = 'Pengajuan';
 
     protected static ?string $modelLabel = 'Pengajuan';
+
+    public static function getNavigationSort(): ?int
+    {
+        return 3; 
+    }
 
     public static function form(Form $form): Form
     {
@@ -196,7 +206,17 @@ class PengajuanResource extends Resource
                     ->openUrlInNewTab() // buka di tab baru
                     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
                 Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
+                    ->searchable()
+                    ->badge() // tampil sebagai badge warna
+                    ->color(fn (string $state): string => match ($state) {
+                        'Menunggu Verifikasi' => 'warning',   // kuning
+                        'Ditolak'             => 'danger',    // merah
+                        'Terverifikasi'       => 'success',    // hijau
+                        'Proses Pengajuan'    => 'info',   // biru
+                        'Selesai'             => 'secondary',   // abu
+                        default               => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state) => ucfirst($state)),
                 // Tables\Columns\TextColumn::make('suratTandaKehormatan')
                 //     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -216,16 +236,169 @@ class PengajuanResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->visible(fn ($record) => in_array($record->status, ['Menunggu Verifikasi', 'Selesai', 'Ditolak'])),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('verifikasi')
+                    ->label('Verifikasi')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->button()
+                    ->visible(fn ($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']) && $record->status === 'Menunggu Verifikasi')
+                    ->requiresConfirmation()
+                    ->action(function (Pengajuan $record) {
+                        $record->update(['status' => 'Terverifikasi']);
+                        Notification::make()
+                                ->title('Pengajuan berhasil diverifikasi.')
+                                ->success()
+                                ->send();
+                    }),
+                Tables\Actions\Action::make('ajukan')
+                    ->label('Ajukan')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->button()
+                    ->visible(fn ($record) => auth()->user()->hasRole('bagwatpers') && $record->status === 'Terverifikasi')
+                    ->requiresConfirmation()
+                    ->action(function (Pengajuan $record) {
+                        $record->update(['status' => 'Proses Pengajuan']);
+                        Notification::make()
+                                ->title('Pengajuan berhasil diproses.')
+                                ->success()
+                                ->send();
+                    }),
+                Tables\Actions\Action::make('disetujui')
+                    ->label('Setujui')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->button()
+                    ->visible(fn ($record) => auth()->user()->hasRole('bagwatpers') && $record->status === 'Proses Pengajuan')
+                    ->requiresConfirmation()
+                    ->action(function (Pengajuan $record) {
+                        $record->update(['status' => 'Selesai']);
+                        Notification::make()
+                                ->title('Pengajuan berhasil diselesaikan.')
+                                ->success()
+                                ->send();
+                    }),
+                Tables\Actions\Action::make('tolak')
+                    ->label('Tolak')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->button()
+                    ->visible(fn ($record) =>
+                        auth()->user()->hasRole(['renmin', 'bagwatpers']) &&
+                        in_array($record->status, ['Menunggu Verifikasi', 'Proses Pengajuan'])
+                    )
+                    ->requiresConfirmation()
+                    ->form([
+                        Forms\Components\Textarea::make('catatan')
+                            ->label('Alasan Penolakan')
+                            ->required()
+                            ->rows(3)
+                            ->placeholder('Masukkan alasan penolakan pengajuan ini...'),
+                    ])
+                    ->action(function (Pengajuan $record, array $data) {
+                        $record->update(['status' => 'Ditolak', 'catatan' => $data['catatan']]);
+                        Notification::make()
+                                ->title('Pengajuan berhasil ditolak.')
+                                ->success()
+                                ->send();
+                    }),
+                    Tables\Actions\Action::make('buatSurat')
+                    ->label('Buat Surat')
+                    ->icon('heroicon-o-document-text')
+                    ->color('primary')
+                    ->button()
+                    ->visible(fn ($record) => auth()->user()->hasRole('renmin') && $record->status === 'Selesai')
+                    ->action(function ($record, $livewire) {
+                        return redirect()->route(
+                            'filament.sitanhor.resources.surat-tanda-kehormatans.create',
+                            [
+                                'pengajuan_id' => $record->id,
+                                'nrp'          => $record->personel->nrp,
+                                'periode'      => $record->periode->tahun,
+                                'kategori'     => $record->kategori->kode_kategori,
+                            ]
+                        );
+                    }),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn () => auth()->user()->hasRole('bagwatpers'))
+                    ->requiresConfirmation()
+                    ->successNotification(
+                        Notification::make()
+                            ->title('Pengajuan berhasil dihapus.')
+                            ->success()
+                    )
+                    ->failureNotification(
+                        Notification::make()
+                            ->title('Pengajuan gagal dihapus.')
+                            ->danger()
+                    ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+
+                    // 🔍 BULK VERIFIKASI → untuk renmin & bagwatpers
+                    Tables\Actions\BulkAction::make('bulkVerifikasi')
+                        ->label('Verifikasi Terpilih')
+                        ->icon('heroicon-o-check-badge')
+                        ->color('success')
+                        ->visible(fn () => auth()->user()->hasRole(['renmin', 'bagwatpers']))
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            if ($records->contains(fn ($record) => $record->status !== 'Menunggu Verifikasi')) {
+                                Notification::make()
+                                    ->title('Hanya data dengan status "Menunggu Verifikasi" yang dapat diverifikasi.')
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+                            $records->each->update(['status' => 'Terverifikasi']);
+                            Notification::make()
+                                ->title('Pengajuan berhasil diverifikasi.')
+                                ->success()
+                                ->send();
+                        }),
+                    
+                    Tables\Actions\BulkAction::make('bulkAjukan')
+                        ->label('Ajukan Terpilih')
+                        ->icon('heroicon-o-check-badge')
+                        ->color('success')
+                        ->visible(fn () => auth()->user()->hasRole('bagwatpers'))
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            if ($records->contains(fn ($record) => $record->status !== 'Terverifikasi')) {
+                                Notification::make()
+                                    ->title('Hanya data dengan status Terverifikasi yang dapat diajukan.')
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+                            $records->each->update(['status' => 'Proses Pengajuan']);
+                            Notification::make()
+                                ->title('Pengajuan berhasil diajukan.')
+                                ->success()
+                                ->send();
+                        }),
+
+                    // 🗑️ BULK DELETE → hanya untuk bagwatpers
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->hasRole('bagwatpers'))
+                        ->requiresConfirmation()
+                        ->successNotificationTitle('Pengajuan berhasil dihapus!'),
+
+                    // ❌ FORCE DELETE → hanya bagwatpers
+                    Tables\Actions\ForceDeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->hasRole('bagwatpers'))
+                        ->requiresConfirmation(),
+
+                    // 🔁 RESTORE → hanya bagwatpers
+                    Tables\Actions\RestoreBulkAction::make()
+                        ->visible(fn () => auth()->user()->hasRole('bagwatpers')),
                 ]),
             ]);
+
     }
 
     public static function getRelations(): array

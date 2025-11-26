@@ -19,4 +19,11 @@ class EditPengajuan extends EditRecord
             Actions\RestoreAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Set status kembali ke "Menunggu Verifikasi" saat diedit
+        $data['status'] = 'Menunggu Verifikasi';
+        return $data;
+    }
 }

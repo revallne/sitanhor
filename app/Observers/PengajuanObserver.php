@@ -22,6 +22,11 @@ class PengajuanObserver
             throw new \Exception('Anda sudah memiliki pengajuan untuk periode dan kategori ini.');
         }
     }
+
+    public function updating(Pengajuan $pengajuan): void
+    {
+        // $pengajuan->status = 'Menunggu Verifikasi';
+    }
     /**
      * Handle the Pengajuan "created" event.
      */

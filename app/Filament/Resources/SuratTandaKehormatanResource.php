@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Notifications\Notification;
 
 class SuratTandaKehormatanResource extends Resource
 {
@@ -25,26 +27,35 @@ class SuratTandaKehormatanResource extends Resource
 
     protected static ?string $modelLabel = 'Surat Tanhor';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 4; 
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('nrp')
                     ->label('NRP Penerima')
+                    ->default(request('nrp'))
                     ->required()
                     ->maxLength(20),
 
                 Forms\Components\Select::make('periode_tahun')
                     ->label('Periode')
+                    ->default(request('periode'))
                     ->relationship('pengajuan.periode', 'tahun')
                     ->required(),
 
                 Forms\Components\Select::make('kategori_kode_kategori')
                     ->label('Tanda Kehormatan')
+                    ->default(request('kategori'))
                     ->relationship('pengajuan.kategori', 'nama_kategori')
                     ->required(),
 
-                Forms\Components\Hidden::make('pengajuan_id'),
+                Forms\Components\Hidden::make('pengajuan_id')
+                 ->default(request('pengajuan_id')),
 
                 Forms\Components\TextInput::make('noKepres')
                     ->label('Nomor Keppres')
@@ -121,13 +132,27 @@ class SuratTandaKehormatanResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn () => auth()->user()->hasRole(['bagwatpers', 'renmin']))
+                    ->requiresConfirmation()
+                    ->successNotification(
+                        Notification::make()
+                            ->title('Surat Tanda Kehormatan berhasil dihapus.')
+                            ->success()
+                    )
+                    ->failureNotification(
+                        Notification::make()
+                            ->title('Surat Tanda Kehormatan gagal dihapus.')
+                            ->danger()
+                    ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
-                ]),
+                ])
+                ->visible(fn () => auth()->user()->hasRole(['bagwatpers', 'renmin'])),
             ]);
     }
 
@@ -150,9 +175,49 @@ class SuratTandaKehormatanResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
+        $user = auth()->user();
+
+        // Base query tanpa soft delete scope
+        $query = parent::getEloquentQuery()
+            ->withoutGlobalScopes([SoftDeletingScope::class]);
+
+        // 1. bagwatpers (admin) → lihat semua
+        if ($user->hasRole('bagwatpers')) {
+            return $query;
+        }
+
+        // 2. renmin → lihat hanya data dari satkernya
+        if ($user->hasRole('renmin')) {
+
+            // Ambil satker renmin dari tabel satker
+            $satker = \App\Models\Satker::where('user_email', $user->email)->first();
+
+            if (!$satker) {
+                return $query->whereRaw('1 = 0'); // Tidak punya satker → tidak boleh lihat data
+            }
+
+            // Filter berdasarkan satker personel
+            return $query->whereHas('pengajuan.personel', function ($q) use ($satker) {
+                $q->where('kode_satker', $satker->kode_satker);
+            });
+        }
+
+        // 3. personel → hanya data miliknya sendiri
+        if ($user->hasRole('personel')) {
+
+            $nrp = $user->personel->nrp ?? null;
+
+            if (!$nrp) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->whereHas('pengajuan', function ($q) use ($nrp) {
+                $q->where('personel_nrp', $nrp);
+            });
+        }
+
+        // Default → tidak boleh melihat apapun
+        return $query->whereRaw('1 = 0');
     }
+
 }

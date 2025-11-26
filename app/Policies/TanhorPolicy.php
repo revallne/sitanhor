@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Personel;
+use App\Models\SuratTandaKehormatan;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class PersonelPolicy
+class TanhorPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,9 +19,9 @@ class PersonelPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Personel $personel): bool
+    public function view(User $user, SuratTandaKehormatan $suratTandaKehormatan): bool
     {
-        return auth()->user()->hasRole(['bagwatpers', 'personel']);
+        return false;
     }
 
     /**
@@ -29,29 +29,29 @@ class PersonelPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return auth()->user()->hasRole(['bagwatpers', 'renmin']);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Personel $personel): bool
+    public function update(User $user, SuratTandaKehormatan $suratTandaKehormatan): bool
     {
-        return auth()->user()->hasRole(['bagwatpers', 'personel']);
+        return auth()->user()->hasRole(['bagwatpers', 'renmin']);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Personel $personel): bool
+    public function delete(User $user, SuratTandaKehormatan $suratTandaKehormatan): bool
     {
-        return false;
+        return auth()->user()->hasRole(['bagwatpers', 'renmin']);
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Personel $personel): bool
+    public function restore(User $user, SuratTandaKehormatan $suratTandaKehormatan): bool
     {
         return false;
     }
@@ -59,7 +59,7 @@ class PersonelPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Personel $personel): bool
+    public function forceDelete(User $user, SuratTandaKehormatan $suratTandaKehormatan): bool
     {
         return false;
     }

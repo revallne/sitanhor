@@ -23,6 +23,10 @@ class SatkerResource extends Resource
 
     protected static ?string $modelLabel = 'Satuan Kerja';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 7; 
+    }
 
     public static function form(Form $form): Form
     {

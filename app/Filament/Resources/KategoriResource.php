@@ -23,6 +23,11 @@ class KategoriResource extends Resource
 
     protected static ?string $modelLabel = 'Tanhor';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 6; 
+    }
+
     public static function form(Form $form): Form
     {
         return $form

@@ -15,6 +15,10 @@ class PengajuanStatsOverview extends BaseWidget
     {
         $user = auth()->user();
 
+        if ($user->hasRole('personel')) {
+            return [];
+        }
+        
         // Jika user adalah RENMIN → filter berdasarkan satkernya
         if ($user->hasRole('renmin')) {
             $userSatker = $user->satker->kode_satker;

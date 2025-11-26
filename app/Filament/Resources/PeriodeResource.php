@@ -23,6 +23,11 @@ class PeriodeResource extends Resource
 
     protected static ?string $modelLabel = 'Periode';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 5; 
+    }
+
     public static function form(Form $form): Form
     {
         return $form

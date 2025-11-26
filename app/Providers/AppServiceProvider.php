@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\SuratTandaKehormatan;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use App\Policies\PermissionPolicy;
 use App\Policies\RolePolicy;
+use App\Policies\TanhorPolicy;
 use Illuminate\Database\Eloquent\Model;
 
 class AppServiceProvider extends ServiceProvider
@@ -28,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
         Model::unguard();
         Gate::policy(Permission::class, PermissionPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
+        Gate::policy(SuratTandaKehormatan::class, TanhorPolicy::class);
     }
 }
 

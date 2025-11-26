@@ -24,6 +24,12 @@ class PersonelResource extends Resource
 
     protected static ?string $modelLabel = 'Personel';
 
+    public static function getNavigationSort(): ?int
+    {
+        return 2; 
+    }
+
+
     public static function form(Form $form): Form
     {
         return $form
@@ -150,9 +156,43 @@ class PersonelResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
+        $user = auth()->user();
+
+        // Base Query
+        $query = parent::getEloquentQuery()
+            ->withoutGlobalScopes([SoftDeletingScope::class]);
+
+        // 1. ADMIN → akses semua
+        if ($user->hasRole('bagwatpers')) {
+            return $query;
+        }
+
+        // 2. RENMIN → hanya personel dalam satker yang ditangani
+        if ($user->hasRole('renmin')) {
+
+            $satker = \App\Models\Satker::where('user_email', $user->email)->first();
+
+            if ($satker) {
+                return $query->where('kode_satker', $satker->kode_satker);
+            }
+
+            return $query->whereRaw('1 = 0'); // jika satker tidak ditemukan
+        }
+
+        // 3. PERSONEL → hanya datanya sendiri
+        if ($user->hasRole('personel')) {
+
+            $nrp = $user->personel->nrp ?? null;
+
+            if (! $nrp) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->where('nrp', $nrp);
+        }
+
+        // Default → tidak ada akses
+        return $query->whereRaw('1 = 0');
     }
+
 }
