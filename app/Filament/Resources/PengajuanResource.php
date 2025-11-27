@@ -150,6 +150,10 @@ class PengajuanResource extends Resource
                             . $file->getClientOriginalExtension()       // ambil ekstensi file asli
                         ),
                     ),
+                // Forms\Components\TextArea::make('catatan')
+                //     ->label('Catatan Penolakan')
+                //     ->visible(fn ($record) => $record->status === 'Ditolak')
+                //     ->disabled(),
                     
                 // Forms\Components\TextInput::make('status')
                 //     ->required()
@@ -180,31 +184,47 @@ class PengajuanResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('surat_tanda_kehormatan')
                     ->label('Nomor dan Tanggal Keppres')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('tanggal_pengajuan')
                     ->label('Tanggal Pengajuan')
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sk_tmt')
                     ->label('SK TMT Pertama')
+                    ->visible(fn ($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']))
                     ->url(fn ($record) => asset('storage/' . $record->sk_tmt)) // arahkan ke lokasi file di public/storage
                     ->openUrlInNewTab() // buka di tab baru
                     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
                 Tables\Columns\TextColumn::make('sk_pangkat')
                     ->label('SK Pangkat Terakhir')
+                    ->visible(fn ($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']))
                     ->url(fn ($record) => asset('storage/' . $record->sk_pangkat)) // arahkan ke lokasi file di public/storage
                     ->openUrlInNewTab() // buka di tab baru
                     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
                 Tables\Columns\TextColumn::make('sk_jabatan')
                     ->label('SK Jabatan Terakhir')
+                    ->visible(fn ($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']))
                     ->url(fn ($record) => asset('storage/' . $record->sk_jabatan)) // arahkan ke lokasi file di public/storage
                     ->openUrlInNewTab() // buka di tab baru
                     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
                 Tables\Columns\TextColumn::make('drh')
                     ->label('Daftar Riwayat Hidup')
+                    ->visible(fn ($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']))
                     ->url(fn ($record) => asset('storage/' . $record->drh)) // arahkan ke lokasi file di public/storage
                     ->openUrlInNewTab() // buka di tab baru
                     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
+
+                // BELOM FIXXX!!!!
+                Tables\Columns\TextColumn::make('catatan')
+                    ->label('Catatan Penolakan'),
+                    //->visible(fn ($record) => $record->status === 'Ditolak'),
+                // Tables\Columns\TextColumn::make('catatan')
+                //     ->label('Catatan Penolakan')
+                //     ->hidden()               // tidak muncul di tabel
+                //     ->visibleOn('view')      // muncul hanya saat halaman view
+                //     ->formatStateUsing(fn ($state) => $state ?? '-')
+                //     ->color('danger')        // warna merah biar terlihat sebagai penolakan
+                //     ->visible(fn ($record) => $record->status === 'Ditolak'), // tampilkan hanya jika ditolak
                 Tables\Columns\TextColumn::make('status')
                     ->searchable()
                     ->badge() // tampil sebagai badge warna
@@ -213,12 +233,10 @@ class PengajuanResource extends Resource
                         'Ditolak'             => 'danger',    // merah
                         'Terverifikasi'       => 'success',    // hijau
                         'Proses Pengajuan'    => 'info',   // biru
-                        'Selesai'             => 'secondary',   // abu
+                        'Selesai'             => 'gray',   // abu
                         default               => 'gray',
                     })
                     ->formatStateUsing(fn (string $state) => ucfirst($state)),
-                // Tables\Columns\TextColumn::make('suratTandaKehormatan')
-                //     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
