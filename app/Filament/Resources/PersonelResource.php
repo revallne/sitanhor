@@ -20,7 +20,9 @@ class PersonelResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
 
-    protected static ?string $pluralModelLabel = 'Personel';
+    protected static ?string $pluralModelLabel = 'Data Personel';
+
+    protected static ?string $navigationLabel = 'Personel';
 
     protected static ?string $modelLabel = 'Personel';
 
@@ -85,20 +87,18 @@ class PersonelResource extends Resource
                 Tables\Columns\TextColumn::make('nrp')
                     ->label('NRP')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('user_email')
-                    ->label('Email')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Nama')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('satker.nama_satker')
                     ->label('Satuan Kerja')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tmt_pertama')
                     ->label('TMT Pertama')
-                    ->date()
-                    ->sortable(),
+                    ->alignment('center')
+                    ->date('d-m-Y'),
                 Tables\Columns\TextColumn::make('pangkat')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('jabatan')
@@ -108,6 +108,9 @@ class PersonelResource extends Resource
                     ->getStateUsing(fn ($record) => 
                         "{$record->tempat_lahir}, " . \Carbon\Carbon::parse($record->tanggal_lahir)->format('Y-m-d')
                     ),
+                // Tables\Columns\TextColumn::make('user_email')
+                //     ->label('Email')
+                //     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -125,8 +128,8 @@ class PersonelResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()->iconButton(),
+                Tables\Actions\EditAction::make()->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

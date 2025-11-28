@@ -37,35 +37,35 @@ class PengajuanStatsOverview extends BaseWidget
                 'Menunggu Verifikasi', 
                 $query->clone()->where('status', 'Menunggu Verifikasi')->count()
             )
-                ->icon('heroicon-o-clock', IconPosition::Before)
+                ->icon('heroicon-s-clock', IconPosition::Before)
                 ->color('warning'),
 
             Stat::make(
                 'Terverifikasi', 
                 $query->clone()->where('status', 'Terverifikasi')->count()
             )
-                ->icon('heroicon-o-check-circle', IconPosition::Before)
+                ->icon('heroicon-s-check-circle', IconPosition::Before)
                 ->color('primary'),
 
             Stat::make(
                 'Proses Pengajuan', 
                 $query->clone()->where('status', 'Proses Pengajuan')->count()
             )
-                ->icon('heroicon-o-cog', IconPosition::Before)
+                ->icon('heroicon-s-cog', IconPosition::Before)
                 ->color('info'),
 
             Stat::make(
                 'Selesai', 
                 $query->clone()->where('status', 'Selesai')->count()
             )
-                ->icon('heroicon-o-flag', IconPosition::Before)
+                ->icon('heroicon-s-flag', IconPosition::Before)
                 ->color('success'),
 
             Stat::make(
                 'Ditolak', 
                 $query->clone()->where('status', 'Ditolak')->count()
             )
-                ->icon('heroicon-o-x-circle', IconPosition::Before)
+                ->icon('heroicon-s-x-circle', IconPosition::Before)
                 ->color('danger'),
         ];
     }

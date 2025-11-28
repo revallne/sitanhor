@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreatePersonel extends CreateRecord
 {
     protected static string $resource = PersonelResource::class;
+
+    protected static ?string $title = 'Data Personel Baru';
+    
 }
+
+

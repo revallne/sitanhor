@@ -58,16 +58,19 @@ class PeriodeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('tahun'),
+                Tables\Columns\TextColumn::make('tahun')
+                    ->label('Tahun')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('tanggalAwal')
                     ->label('Tanggal Mulai')
-                    ->date()
+                    ->date('d F Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tanggalAkhir')
                     ->label('Tanggal Selesai')
-                    ->date()
+                    ->date('d F Y')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status'),
+                Tables\Columns\TextColumn::make('status')
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -82,7 +85,7 @@ class PeriodeResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -10,6 +10,8 @@ class EditPersonel extends EditRecord
 {
     protected static string $resource = PersonelResource::class;
 
+     protected static ?string $title = 'Edit Data Personel';
+
     protected function getHeaderActions(): array
     {
         return [

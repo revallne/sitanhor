@@ -21,7 +21,7 @@ class SuratTandaKehormatanResource extends Resource
 {
     protected static ?string $model = SuratTandaKehormatan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-check';
+    protected static ?string $navigationIcon = 'heroicon-o-trophy';
     
     protected static ?string $pluralModelLabel = 'Surat Tanda Kehormatan';
 
@@ -84,10 +84,6 @@ class SuratTandaKehormatanResource extends Resource
     {
         return $table
             ->columns([
-                // Sembunyikan kolom pengajuan_id (jika sebelumnya ada)
-                // Tables\Columns\TextColumn::make('pengajuan_id')->hidden(),
-
-                // Ambil field dari relasi pengajuan
                 Tables\Columns\TextColumn::make('pengajuan.personel_nrp')
                     ->label('NRP')
                     ->searchable()
@@ -107,12 +103,13 @@ class SuratTandaKehormatanResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('tanggalKepres')
                     ->label('Tanggal Keppres')
-                    ->date(),
-                Tables\Columns\TextColumn::make('file_surat')
-                    ->label('File Surat')
-                    ->url(fn ($record) => asset('storage/' . $record->file_surat)) // arahkan ke lokasi file di public/storage
-                    ->openUrlInNewTab() // buka di tab baru
-                    ->formatStateUsing(fn ($state) => '📄 Lihat Surat'), // ubah teks jadi link “Lihat Surat”
+                    ->date('d F Y'),
+                // Tables\Columns\TextColumn::make('file_surat')
+                //     ->label('File Surat')
+                //     ->alignCenter()
+                //     ->url(fn ($record) => asset('storage/' . $record->file_surat)) // arahkan ke lokasi file di public/storage
+                //     ->openUrlInNewTab() // buka di tab baru
+                //     ->formatStateUsing(fn () => 'Lihat'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -131,8 +128,20 @@ class SuratTandaKehormatanResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('lihat')
+                    ->label('Lihat Surat')
+                    ->color('info')
+                    ->button()
+                    ->url(fn ($record) => asset('storage/' . $record->file_surat)) // arahkan ke lokasi file di public/storage
+                    ->openUrlInNewTab(),
+                Tables\Actions\EditAction::make()
+                    ->label('')
+                    ->icon('heroicon-s-pencil-square')
+                    ->iconButton(),
                 Tables\Actions\DeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-s-trash')
+                    ->iconButton()
                     ->visible(fn () => auth()->user()->hasRole(['bagwatpers', 'renmin']))
                     ->requiresConfirmation()
                     ->successNotification(
@@ -145,6 +154,7 @@ class SuratTandaKehormatanResource extends Resource
                             ->title('Surat Tanda Kehormatan gagal dihapus.')
                             ->danger()
                     ),
+                
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
