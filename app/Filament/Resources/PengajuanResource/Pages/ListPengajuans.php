@@ -12,10 +12,14 @@ class ListPengajuans extends ListRecords
 {
     protected static string $resource = PengajuanResource::class;
 
+    protected ?string $heading = 'Pengajuan Tanda Kehormatan';
+
+    protected ?string $subheading = 'Daftar Pengajuan yang Telah Dibuat';
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()->label('Buat Pengajuan Baru'),
         ];
     }
 

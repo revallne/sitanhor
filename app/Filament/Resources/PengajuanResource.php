@@ -32,7 +32,9 @@ class PengajuanResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Pengajuan';
 
-    protected static ?string $modelLabel = 'Pengajuan';
+    protected ?string $heading = 'Pengajuan';
+
+    protected ?string $subheading = 'Formulir Pengajuan Tanda Kehormatan Polri';
 
     public static function getNavigationSort(): ?int
     {

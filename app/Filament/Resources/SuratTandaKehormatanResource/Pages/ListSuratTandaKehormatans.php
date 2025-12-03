@@ -12,6 +12,11 @@ class ListSuratTandaKehormatans extends ListRecords
 {
     protected static string $resource = SuratTandaKehormatanResource::class;
 
+    protected ?string $heading = 'Tanda Kehormatan';
+
+    protected ?string $subheading = 'Tanda Kehormatan yang Diterima';
+
+
     protected function getHeaderActions(): array
     {
         return [

@@ -29,7 +29,7 @@ class PersonelPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return auth()->user()->hasRole(['bagwatpers', 'personel']);
     }
 
     /**

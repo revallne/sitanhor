@@ -39,18 +39,15 @@ class PersonelResource extends Resource
                 Forms\Components\TextInput::make('nrp')
                     ->label('NRP')
                     ->required()
+                    ->maxLength(8)
                     ->numeric(),
                 Forms\Components\TextInput::make('user_email')
                     ->label('Email Terdaftar')
                     ->email()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('user_name')
-                    ->label('Nama Lengkap')
-                    ->required()
-                    ->default(fn () => Auth::user()->name) // otomatis isi dari user login
-                    ->disabled() // tidak bisa diubah sama sekali
-                    ->dehydrated(false),
+                Forms\Components\TextInput::make('user.name')
+                    ->label('Nama Lengkap'),
                 Forms\Components\Select::make('kode_satker')
                     ->label('Satuan Kerja')
                     ->relationship('satker', 'nama_satker') // tampilkan nama_satker di dropdown
@@ -58,9 +55,6 @@ class PersonelResource extends Resource
                     ->searchable()
                     ->preload()
                     ->required(),
-                // Forms\Components\TextInput::make('kode_satker')
-                //     ->required()
-                //     ->numeric(),
                 Forms\Components\DatePicker::make('tmt_pertama')
                     ->label('TMT Pertama')
                     ->required(),
@@ -103,11 +97,11 @@ class PersonelResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('jabatan')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('ttl')
-                    ->label('Tempat, Tanggal Lahir')
-                    ->getStateUsing(fn ($record) => 
-                        "{$record->tempat_lahir}, " . \Carbon\Carbon::parse($record->tanggal_lahir)->format('Y-m-d')
-                    ),
+                // Tables\Columns\TextColumn::make('ttl')
+                //     ->label('Tempat, Tanggal Lahir')
+                //     ->getStateUsing(fn ($record) => 
+                //         "{$record->tempat_lahir}, " . \Carbon\Carbon::parse($record->tanggal_lahir)->format('Y-m-d')
+                //     ),
                 // Tables\Columns\TextColumn::make('user_email')
                 //     ->label('Email')
                 //     ->searchable(),
@@ -197,5 +191,7 @@ class PersonelResource extends Resource
         // Default → tidak ada akses
         return $query->whereRaw('1 = 0');
     }
+
+    
 
 }
