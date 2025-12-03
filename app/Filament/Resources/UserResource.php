@@ -20,7 +20,7 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $pluralModelLabel = 'Akun User';
+    protected static ?string $pluralModelLabel = 'Akun Pengguna';
 
     protected static ?string $modelLabel = 'User';
 
@@ -48,7 +48,7 @@ class UserResource extends Resource
                     ->password()
                     ->required()
                     ->maxLength(255),
-                Select::make('roles')->multiple()->relationship('roles', 'name')->preload()
+                Select::make('roles')->multiple()->relationship('roles', 'name')->preload()->label('Role Pengguna'),
             ]);
     }
 

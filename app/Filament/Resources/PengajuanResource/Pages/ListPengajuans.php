@@ -19,6 +19,9 @@ class ListPengajuans extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('export')
+                ->label('Ekspor Data Pengajuan')
+                ->openUrlInNewTab(),
             Actions\CreateAction::make()->label('Buat Pengajuan Baru'),
         ];
     }
@@ -53,38 +56,15 @@ class ListPengajuans extends ListRecords
                     $query->where('status', 'Proses Pengajuan')
                 ),
 
-            'selesai' => Tab::make('Selesai')
-                ->modifyQueryUsing(fn (Builder $query) => 
-                    $query->where('status', 'Selesai')
-                ),
-
             'ditolak' => Tab::make('Ditolak')
                 ->modifyQueryUsing(fn (Builder $query) => 
                     $query->where('status', 'Ditolak')
                 ),
 
-            // -----------------------
-            // ▶ TABS KATEGORI
-            // -----------------------
-            // '8tahun' => Tab::make('8 Tahun')
-            //     ->modifyQueryUsing(fn (Builder $query) => 
-            //         $query->where('kategori_id', '8')   // sesuaikan kolom kategori
-            //     ),
-
-            // '16tahun' => Tab::make('16 Tahun')
-            //     ->modifyQueryUsing(fn (Builder $query) => 
-            //         $query->where('kategori_id', '16')
-            //     ),
-
-            // '24tahun' => Tab::make('24 Tahun')
-            //     ->modifyQueryUsing(fn (Builder $query) => 
-            //         $query->where('kategori_id', '24')
-            //     ),
-
-            // '32tahun' => Tab::make('32 Tahun')
-            //     ->modifyQueryUsing(fn (Builder $query) => 
-            //         $query->where('kategori_id', '32')
-            //     ),
+            'selesai' => Tab::make('Selesai')
+                ->modifyQueryUsing(fn (Builder $query) => 
+                    $query->where('status', 'Selesai')
+                ),
         ];
     }
 

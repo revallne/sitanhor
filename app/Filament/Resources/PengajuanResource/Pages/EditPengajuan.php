@@ -13,8 +13,8 @@ class EditPengajuan extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            Actions\ViewAction::make()->label('Lihat Detail'),
+            Actions\DeleteAction::make()->label('Hapus Pengajuan'),
             Actions\ForceDeleteAction::make(),
             Actions\RestoreAction::make(),
         ];
@@ -25,5 +25,16 @@ class EditPengajuan extends EditRecord
         // Set status kembali ke "Menunggu Verifikasi" saat diedit
         $data['status'] = 'Menunggu Verifikasi';
         return $data;
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction()
+                ->label('Simpan Perubahan'), // Ubah label di sini
+            
+            $this->getCancelFormAction()
+                ->label('Batalkan Edit'), // Ubah label di sini
+        ];
     }
 }

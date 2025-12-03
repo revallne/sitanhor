@@ -21,7 +21,7 @@ class PersonelPolicy
      */
     public function view(User $user, Personel $personel): bool
     {
-        return auth()->user()->hasRole(['bagwatpers', 'personel']);
+        return true;
     }
 
     /**

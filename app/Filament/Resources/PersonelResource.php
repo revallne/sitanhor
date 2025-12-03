@@ -22,13 +22,22 @@ class PersonelResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Data Personel';
 
-    protected static ?string $navigationLabel = 'Personel';
-
     protected static ?string $modelLabel = 'Personel';
 
     public static function getNavigationSort(): ?int
     {
         return 2; 
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('personel')) {
+            return 'Profil';
+        }
+
+        return 'Data Personel';
     }
 
 

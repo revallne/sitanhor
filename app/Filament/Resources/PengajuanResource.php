@@ -23,6 +23,7 @@ use Filament\Notifications\Notification;
 use League\CommonMark\Xml\FallbackNodeXmlRenderer;
 use Symfony\Component\Routing\Matcher\Dumper\StaticPrefixCollection;
 use Illuminate\Support\Collection;
+use Filament\Tables\Filters\SelectFilter;
 
 class PengajuanResource extends Resource
 {
@@ -34,7 +35,7 @@ class PengajuanResource extends Resource
 
     protected ?string $heading = 'Pengajuan';
 
-    protected ?string $subheading = 'Formulir Pengajuan Tanda Kehormatan Polri';
+    //protected ?string $subheading = 'Formulir Pengajuan Tanda Kehormatan Polri';
 
     public static function getNavigationSort(): ?int
     {
@@ -242,8 +243,34 @@ class PengajuanResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->emptyStateHeading('Tidak Ada Data Pengajuan')
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
+
+                SelectFilter::make('periode_tahun')
+                    ->label('Filter Periode')
+                    ->relationship('periode', 'tahun') // Asumsi ada relasi 'periode' di model Pengajuan
+                    ->searchable()
+                    ->preload()
+                    ->visible(function (): bool {
+                        $user = Auth::user();
+                        // Filter terlihat jika user adalah bagwatpers ATAU renmin
+                        return $user && ($user->hasRole('bagwatpers') || $user->hasRole('renmin'));
+                    }),
+                    
+                // ✨ FILTER BERDASARKAN KATEGORI (Tabel/Model KategoriTandaKehormatan) ✨
+                SelectFilter::make('kategori.nama_kategori')
+                    ->label('Filter Kategori')
+                    // Asumsi relasi di model Pengajuan adalah 'kategori' 
+                    // dan field nama di model KategoriTandaKehormatan adalah 'nama_kategori'
+                    ->relationship('kategori', 'nama_kategori') 
+                    ->searchable()
+                    ->preload()
+                    ->visible(function (): bool {
+                        $user = Auth::user();
+                        // Filter terlihat jika user adalah bagwatpers ATAU renmin
+                        return $user && ($user->hasRole('bagwatpers') || $user->hasRole('renmin'));
+                    }),
             ])
             ->actions([
                 // Tables\Actions\ViewAction::make()
@@ -424,7 +451,6 @@ class PengajuanResource extends Resource
         return [
             'index' => Pages\ListPengajuans::route('/'),
             'create' => Pages\CreatePengajuan::route('/create'),
-            'detail' => Pages\DetailPengajuan::route('/{record}/detail'),
             'view' => Pages\ViewPengajuan::route('/{record}'),
             'edit' => Pages\EditPengajuan::route('/{record}/edit'),
         ];

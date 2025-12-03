@@ -17,10 +17,12 @@ class ViewPengajuan extends ViewRecord
 {
     protected static string $resource = PengajuanResource::class;
 
+    protected ?string $heading = 'Detail Pengajuan';
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            Actions\EditAction::make()->label('Edit Data Pengajuan'),
             Actions\Action::make('verifikasi')
                 ->label('Verifikasi')
                 ->icon('heroicon-o-check-badge')
@@ -113,7 +115,7 @@ class ViewPengajuan extends ViewRecord
         return $infolist
         ->schema([
             Section::make('Data Pengajuan')
-                ->description('Informasi pengajuan tanda kehormatan')
+                //->description('Informasi pengajuan tanda kehormatan')
                 ->schema([
                     TextEntry::make('personel.user.name')->label('Nama Lengkap'),
                     TextEntry::make('personel_nrp')->label('NRP'),
@@ -136,10 +138,10 @@ class ViewPengajuan extends ViewRecord
                             default               => 'gray',
                         }),
                 ])
-                ->columns(2),
+                ->columns(3),
 
             Section::make('Lampiran Dokumen')
-                ->description('Dokumen wajib yang diunggah pada proses pengajuan')
+                //->description('Dokumen wajib yang diunggah pada proses pengajuan')
                 ->schema([
                     TextEntry::make('sk_tmt')
                         ->label('SK TMT Pertama')
@@ -165,7 +167,7 @@ class ViewPengajuan extends ViewRecord
                         ->url(fn ($record) => asset('storage/' . $record->drh))
                         ->openUrlInNewTab(),
                 ])
-                ->columns(2),
+                ->columns(4),
 
             Section::make('Catatan Penolakan')
                 ->description('Alasan pengajuan ini ditolak')

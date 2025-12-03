@@ -17,19 +17,33 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 
+
 class SuratTandaKehormatanResource extends Resource
 {
     protected static ?string $model = SuratTandaKehormatan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
     
-    protected static ?string $pluralModelLabel = 'Surat Tanda Kehormatan';
+    protected static ?string $pluralModelLabel = 'Penerima Tanda Kehormatan';
+
+    protected ?string $heading = 'Penerima Tanda Kehormatan';
 
     protected static ?string $modelLabel = 'Surat Tanhor';
+
 
     public static function getNavigationSort(): ?int
     {
         return 4; 
+    }
+        public static function getNavigationLabel(): string
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('personel')) {
+            return 'Tanda Kehormatan';
+        }
+
+        return 'Penerima Tanda Kehormatan';
     }
 
     public static function form(Form $form): Form
@@ -123,6 +137,7 @@ class SuratTandaKehormatanResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->emptyStateHeading('Tidak Ada Tanda Kehormatan yang Diterima')
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
             ])
@@ -132,8 +147,28 @@ class SuratTandaKehormatanResource extends Resource
                     ->label('Lihat Surat')
                     ->color('info')
                     ->button()
+                    ->visible(fn () => auth()->user()->hasRole(['bagwatpers', 'renmin']))
                     ->url(fn ($record) => asset('storage/' . $record->file_surat)) // arahkan ke lokasi file di public/storage
                     ->openUrlInNewTab(),
+                Tables\Actions\Action::make('download_personel')
+                    ->label('Unduh Surat')
+                    ->color('success') // Warna yang berbeda agar mudah dibedakan
+                    ->icon('heroicon-o-arrow-down-tray') // Ikon download
+                    ->button()
+                    ->url(fn ($record) => asset('storage/' . $record->file_surat))
+                    
+                    // PENTING: Menambahkan atribut 'download' agar browser langsung mendownload
+                    ->openUrlInNewTab()
+                    ->extraAttributes([
+                        'download' => true, 
+                    ])
+                    
+                    // KONTROL VISIBILITY: Hanya terlihat untuk role 'personel'
+                    ->visible(function () {
+                        $user = auth()->user();
+                        // Pastikan user login dan memiliki role 'personel'
+                        return $user && $user->hasRole('personel');
+                    }),
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
