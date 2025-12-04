@@ -24,6 +24,8 @@ use League\CommonMark\Xml\FallbackNodeXmlRenderer;
 use Symfony\Component\Routing\Matcher\Dumper\StaticPrefixCollection;
 use Illuminate\Support\Collection;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Actions\ExportAction;
+use App\Filament\Exports\PengajuanExporter;
 
 class PengajuanResource extends Resource
 {
@@ -435,7 +437,9 @@ class PengajuanResource extends Resource
                     Tables\Actions\RestoreBulkAction::make()
                         ->visible(fn () => auth()->user()->hasRole('bagwatpers')),
                 ]),
-            ]);
+            ])
+            ->paginationPageOptions([50, 100, 200, 'all']) // Mendefinisikan semua opsi yang tersedia
+            ->defaultPaginationPageOption(50);
 
     }
 

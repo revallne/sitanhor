@@ -198,7 +198,9 @@ class SuratTandaKehormatanResource extends Resource
                     Tables\Actions\RestoreBulkAction::make(),
                 ])
                 ->visible(fn () => auth()->user()->hasRole(['bagwatpers', 'renmin'])),
-            ]);
+            ])
+            ->paginationPageOptions([50, 100, 200, 'all']) // Mendefinisikan semua opsi yang tersedia
+            ->defaultPaginationPageOption(50);
     }
 
     public static function getRelations(): array

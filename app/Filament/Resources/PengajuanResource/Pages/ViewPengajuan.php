@@ -124,8 +124,9 @@ class ViewPengajuan extends ViewRecord
                     TextEntry::make('personel.jabatan')->label('Jabatan'),
                     TextEntry::make('personel.satker.nama_satker')->label('Satuan Kerja'),
                     TextEntry::make('periode_tahun')->label('Periode Pengajuan'),
-                    TextEntry::make('kategori.nama_kategori')->label('Tanhor'),
-                    TextEntry::make('tanggal_pengajuan')->label('Tanggal Pengajuan'),
+                    TextEntry::make('kategori.nama_kategori')->label('Tanhor yang Diajukan'),
+                    TextEntry::make('tanggal_pengajuan')->label('Tanggal Pengajuan')->date('d F Y'),
+                    TextEntry::make('surat_tanda_kehormatan')->label('Nomor dan tanggal Keppres Tanda Kehormatan Pengabdian Sebelumnya')->default('-'),
                     TextEntry::make('status')
                         ->label('Status')
                         ->badge()

@@ -30,7 +30,7 @@ class SitanhorPanelProvider extends PanelProvider
             ->brandName('SITANHOR')
             ->login()
             ->colors([
-                'primary'   => '#a65f00', // coklat
+                'primary'   => '#7E481C', // coklat
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -56,6 +56,7 @@ class SitanhorPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->plugin(FilamentSpatieRolesPermissionsPlugin::make());
+            ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
+            ->databaseNotifications();
     }
 }

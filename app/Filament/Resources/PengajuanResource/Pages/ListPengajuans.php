@@ -7,6 +7,10 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
+// use Filament\Actions\Exports\ExportAction;
+use Filament\Actions\ExportAction;
+use App\Filament\Exports\PengajuanExporter;
+
 
 class ListPengajuans extends ListRecords
 {
@@ -19,10 +23,28 @@ class ListPengajuans extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('export')
-                ->label('Ekspor Data Pengajuan')
-                ->openUrlInNewTab(),
-            Actions\CreateAction::make()->label('Buat Pengajuan Baru'),
+            ExportAction::make()
+                ->exporter(PengajuanExporter::class)
+                ->color('primary')
+                ->label('Unduh Data Pengajuan')
+                //->visible(fn () => auth()->user()->hasRole('bagwatpers'))
+                ->modifyQueryUsing(fn (Builder $query) => 
+                    $query->where('status', 'Proses Pengajuan')
+                )
+                // ✨ KONDISI VISIBLE BERDASARKAN TAB AKTIF ✨
+                ->visible(function ($livewire) {
+                    $user = auth()->user();
+                    
+                    // 1. Cek Role (hanya bagwatpers yang boleh export)
+                    $isAllowedRole = $user && $user->hasRole('bagwatpers');
+                    
+                    // 2. Cek Tab Aktif
+                    $activeTab = $livewire->activeTab; // PERBAIKAN: Mengakses properti $activeTab
+                    $isProsesTab = ($activeTab === 'proses'); // Cek key tab 'proses'
+                    
+                    // Action hanya terlihat jika Role diizinkan DAN Tab adalah 'Proses Pengajuan'
+                    return $isAllowedRole && $isProsesTab;
+                }),
         ];
     }
 
