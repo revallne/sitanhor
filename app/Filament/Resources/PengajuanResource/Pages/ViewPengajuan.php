@@ -106,6 +106,11 @@ class ViewPengajuan extends ViewRecord
                         ]
                     );
                 }),
+            Actions\Action::make('kembali')
+                ->label('Kembali')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url($this->getResource()::getUrl('index')),
 
         ];
     }

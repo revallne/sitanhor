@@ -21,7 +21,7 @@ class TanhorPolicy
      */
     public function view(User $user, SuratTandaKehormatan $suratTandaKehormatan): bool
     {
-        return false;
+        return true;
     }
 
     /**

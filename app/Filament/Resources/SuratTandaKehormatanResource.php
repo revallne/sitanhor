@@ -100,8 +100,7 @@ class SuratTandaKehormatanResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('pengajuan.personel_nrp')
                     ->label('NRP')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('pengajuan.personel.user.name')
                     ->label('Nama')
                     ->searchable()
@@ -142,7 +141,7 @@ class SuratTandaKehormatanResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                
                 Tables\Actions\Action::make('lihat')
                     ->label('Lihat Surat')
                     ->color('info')
@@ -169,6 +168,8 @@ class SuratTandaKehormatanResource extends Resource
                         // Pastikan user login dan memiliki role 'personel'
                         return $user && $user->hasRole('personel');
                     }),
+                Tables\Actions\ViewAction::make()
+                    ->iconButton(),
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-s-pencil-square')

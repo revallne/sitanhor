@@ -35,35 +35,45 @@ class ListSuratTandaKehormatans extends ListRecords
 
         return [
             'all' => Tab::make('Semua'),
-            
+
             '8tahun' => Tab::make('8 Tahun')
-                ->modifyQueryUsing(fn (Builder $query) => 
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
                     $query->whereHas('pengajuan', function ($q) {
                         $q->where('kategori_kode_kategori', '8');
                     })
                 ),
 
             '16tahun' => Tab::make('16 Tahun')
-                ->modifyQueryUsing(fn (Builder $query) => 
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
                     $query->whereHas('pengajuan', function ($q) {
                         $q->where('kategori_kode_kategori', '16');
                     })
                 ),
 
             '24tahun' => Tab::make('24 Tahun')
-                ->modifyQueryUsing(fn (Builder $query) => 
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
                     $query->whereHas('pengajuan', function ($q) {
                         $q->where('kategori_kode_kategori', '24');
                     })
                 ),
 
             '32tahun' => Tab::make('32 Tahun')
-                ->modifyQueryUsing(fn (Builder $query) => 
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
                     $query->whereHas('pengajuan', function ($q) {
                         $q->where('kategori_kode_kategori', '32');
                     })
                 ),
+
+            'nararya' => Tab::make('Nararya')
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereHas('pengajuan.kategori', function ($q) {
+                    $q->where('nama_kategori', 'Nararya'); // atau kolom nama yang sesuai
+                    // $q->where('nama', 'Nararya');
+                    // $q->where('slug', 'nararya');
+                })),
         ];
     }
-
 }
