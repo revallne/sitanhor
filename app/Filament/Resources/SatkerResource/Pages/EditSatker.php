@@ -13,8 +13,22 @@ class EditSatker extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            Actions\Action::make('kembali')
+                ->label('Kembali')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url($this->getResource()::getUrl('index')),
+        ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction()
+                ->label('Simpan Perubahan Data'), // Ubah label di sini
+            
+            $this->getCancelFormAction()
+                ->label('Batalkan Edit'), // Ubah label di sini
         ];
     }
 }

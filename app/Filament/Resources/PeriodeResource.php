@@ -70,6 +70,13 @@ class PeriodeResource extends Resource
                     ->date('d F Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge() // tampil sebagai badge warna
+                    ->color(fn (string $state): string => match ($state) {
+                        'Buka'       => 'success',    // hijau
+                        'Tutup'             => 'gray',   // abu
+                        default               => 'gray',
+                    })
                     ->alignCenter(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

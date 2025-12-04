@@ -168,8 +168,8 @@ class SuratTandaKehormatanResource extends Resource
                         // Pastikan user login dan memiliki role 'personel'
                         return $user && $user->hasRole('personel');
                     }),
-                Tables\Actions\ViewAction::make()
-                    ->iconButton(),
+                // Tables\Actions\ViewAction::make()
+                //     ->iconButton(),
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-s-pencil-square')

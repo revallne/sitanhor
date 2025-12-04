@@ -13,8 +13,12 @@ class EditSuratTandaKehormatan extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
             Actions\DeleteAction::make()->label('Hapus'),
+            Actions\Action::make('kembali')
+                ->label('Kembali')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url($this->getResource()::getUrl('index')),
             Actions\ForceDeleteAction::make(),
             Actions\RestoreAction::make(),
         ];

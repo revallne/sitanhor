@@ -221,7 +221,6 @@ class PengajuanResource extends Resource
                 //     ->openUrlInNewTab() // buka di tab baru
                 //     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
                 Tables\Columns\TextColumn::make('status')
-                    ->searchable()
                     ->badge() // tampil sebagai badge warna
                     ->color(fn (string $state): string => match ($state) {
                         'Menunggu Verifikasi' => 'warning',   // kuning

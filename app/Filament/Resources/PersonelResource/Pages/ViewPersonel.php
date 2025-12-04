@@ -21,6 +21,11 @@ class ViewPersonel extends ViewRecord
     {
         return [
             Actions\EditAction::make()->label('Edit Data'),
+            Actions\Action::make('kembali')
+                ->label('Kembali')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url($this->getResource()::getUrl('index')),
         ];
     }
 
