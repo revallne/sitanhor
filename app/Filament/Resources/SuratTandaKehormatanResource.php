@@ -16,6 +16,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Notifications\Notification;
+use Filament\Tables\Filters\SelectFilter;
 
 
 class SuratTandaKehormatanResource extends Resource
@@ -110,7 +111,8 @@ class SuratTandaKehormatanResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pengajuan.kategori.nama_kategori')
                     ->label('Kategori')
-                    ->sortable(),
+                    ->sortable()
+                    ->visible(fn () => !auth()->user()->hasRole('personel')),
                 Tables\Columns\TextColumn::make('noKepres')
                     ->label('Nomor Keppres')
                     ->searchable(),
@@ -138,7 +140,13 @@ class SuratTandaKehormatanResource extends Resource
             ])
             ->emptyStateHeading('Tidak Ada Tanda Kehormatan yang Diterima')
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TrashedFilter::make()->label('Data yang Dihapus'),
+                SelectFilter::make('periode_tahun')
+                    ->label('Filter Berdasarkan Periode')
+                    // Mengikuti relasi dari SuratTandaKehormatan -> Pengajuan -> Periode
+                    ->relationship('pengajuan.periode', 'tahun') 
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 

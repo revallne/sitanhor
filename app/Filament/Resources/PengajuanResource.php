@@ -246,7 +246,7 @@ class PengajuanResource extends Resource
             ])
             ->emptyStateHeading('Tidak Ada Data Pengajuan')
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TrashedFilter::make()->label('Data yang Dihapus'),
 
                 SelectFilter::make('periode_tahun')
                     ->label('Filter Periode')

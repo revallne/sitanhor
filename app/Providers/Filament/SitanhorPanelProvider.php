@@ -18,6 +18,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
+use App\Filament\Pages\Auth\LoginCustom;
 
 class SitanhorPanelProvider extends PanelProvider
 {
@@ -27,8 +28,9 @@ class SitanhorPanelProvider extends PanelProvider
             ->default()
             ->id('sitanhor')
             ->path('sitanhor')
-            ->brandName('SITANHOR')
-            ->login()
+            ->brandLogo(asset('images/logo.png'))
+            ->brandLogoHeight('4rem')
+            ->login(LoginCustom::class)
             ->colors([
                 'primary'   => '#7E481C', // coklat
             ])

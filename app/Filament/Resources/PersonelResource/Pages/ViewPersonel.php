@@ -15,7 +15,20 @@ class ViewPersonel extends ViewRecord
 
     protected static ?string $title = 'Profil';
 
-    
+    public function getHeading(): string
+    {
+        $user = auth()->user();
+        
+        // Pastikan user login sebelum mengecek role
+        if ($user && $user->hasRole('personel')) {
+            return 'Profil Saya';
+        }
+
+        // Untuk role lain (bagwatpers, renmin) atau jika role 'personel' tidak memiliki data
+        return 'Profil';
+    }
+
+
 
     protected function getHeaderActions(): array
     {
@@ -25,11 +38,12 @@ class ViewPersonel extends ViewRecord
                 ->label('Kembali')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
-                ->url($this->getResource()::getUrl('index')),
+                ->url($this->getResource()::getUrl('index'))
+                ->visible(fn () => !auth()->user()->hasRole('personel')),
         ];
     }
 
-     public function infolist(Infolist $infolist): Infolist
+    public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
             ->schema([

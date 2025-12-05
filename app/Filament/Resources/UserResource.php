@@ -78,7 +78,7 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TrashedFilter::make()->label('Data yang Dihapus'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
