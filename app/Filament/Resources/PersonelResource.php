@@ -54,9 +54,10 @@ class PersonelResource extends Resource
                     ->label('Email Terdaftar')
                     ->email()
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(50),
                 Forms\Components\TextInput::make('user.name')
-                    ->label('Nama Lengkap'),
+                    ->label('Nama Lengkap')
+                    ->maxLength(50),
                 Forms\Components\Select::make('kode_satker')
                     ->label('Satuan Kerja')
                     ->relationship('satker', 'nama_satker') // tampilkan nama_satker di dropdown
@@ -69,14 +70,16 @@ class PersonelResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('pangkat')
                     ->required()
-                    ->maxLength(255),
+                    ->dehydrateStateUsing(fn ($state) => ucwords(strtolower($state)))
+                    ->maxLength(30),
                 Forms\Components\TextInput::make('jabatan')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(100),
                 Forms\Components\TextInput::make('tempat_lahir')
                     ->label('Tempat Lahir')
                     ->required()
-                    ->maxLength(255),
+                    ->dehydrateStateUsing(fn ($state) => ucwords(strtolower($state)))
+                    ->maxLength(30),
                 Forms\Components\DatePicker::make('tanggal_lahir')
                     ->label('Tanggal Lahir')
                     ->required(),

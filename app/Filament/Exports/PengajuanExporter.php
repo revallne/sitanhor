@@ -61,7 +61,7 @@ class PengajuanExporter extends Exporter
                     if (!$personel || !$personel->tempat_lahir || !$personel->tanggal_lahir) {
                         return 'N/A';
                     }
-                    $tanggalLahirFormatted = Carbon::parse($personel->tanggal_lahir)->format('d-m-Y');
+                    $tanggalLahirFormatted = Carbon::parse($personel->tanggal_lahir)->format('Y-m-d');
                     return "{$personel->tempat_lahir}, {$tanggalLahirFormatted}";
                 }),
 
