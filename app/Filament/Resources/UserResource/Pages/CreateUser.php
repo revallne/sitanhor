@@ -10,7 +10,7 @@ class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
-    protected static ?string $recordTitleAttribute = 'Buat Akun Baru';
+    protected static ?string $title = 'Buat Akun Baru';
 
     protected function getFormActions(): array
     {

@@ -8,6 +8,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Support\Enums\IconPosition;
 use App\Models\Kategori;
 use Filament\Widgets\ChartWidget;
+use Carbon\Carbon;
 
 class PengajuanStatsOverview extends BaseWidget
 {
@@ -18,19 +19,35 @@ class PengajuanStatsOverview extends BaseWidget
         if ($user->hasRole('personel')) {
             return [];
         }
+
+        // 1. Tentukan tahun saat ini
+        $currentYear = Carbon::now()->year;
+
+        // 2. Inisialisasi Query Dasar (Akses Semua)
+        $query = Pengajuan::query();
         
         // Jika user adalah RENMIN → filter berdasarkan satkernya
         if ($user->hasRole('renmin')) {
-            $userSatker = $user->satker->kode_satker;
+            // Ambil kode satker renmin (asumsi sudah ada relasi user->satker)
+            $userSatker = $user->satker->kode_satker ?? null;
 
-            $query = Pengajuan::whereHas('personel', function ($q) use ($userSatker) {
-                $q->where('kode_satker', $userSatker);
-            });
+            if ($userSatker) {
+                 $query->whereHas('personel', function ($q) use ($userSatker) {
+                    $q->where('kode_satker', $userSatker);
+                });
+            } else {
+                // Jika renmin tidak punya satker, kosongkan query
+                return [
+                    Stat::make('Menunggu Verifikasi', 0)->icon('heroicon-s-clock')->color('warning'),
+                ];
+            }
         } 
         // Jika user adalah BAGWAT PERS → akses semua data
         else {
             $query = Pengajuan::query();
         }
+
+        $query->where('periode_tahun', $currentYear);
 
         return [
             Stat::make(

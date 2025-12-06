@@ -41,9 +41,7 @@ class SitanhorPanelProvider extends PanelProvider
             ])
             //->sidebarCollapsibleOnDesktop()
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                Widgets\AccountWidget::class,
-            ])
+            ->widgets([])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -60,5 +58,20 @@ class SitanhorPanelProvider extends PanelProvider
             ])
             ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
             ->databaseNotifications();
+    }
+
+    protected function getPages(): array
+    {
+        $user = Auth::user();
+        
+        // 1. Jika pengguna belum login (null) atau role-nya adalah personel, kembalikan array kosong.
+        if (!$user || $user->hasRole('personel')) {
+            return [];
+        }
+
+        // 2. Untuk role lain (bagwatpers, renmin), tampilkan Dashboard
+        return [
+            Pages\Dashboard::class,
+        ];
     }
 }

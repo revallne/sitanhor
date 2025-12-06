@@ -23,6 +23,7 @@ class ListPengajuans extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\CreateAction::make()->label('Buat Pengajuan Baru'),
             ExportAction::make()
                 ->exporter(PengajuanExporter::class)
                 ->color('primary')

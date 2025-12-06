@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('kategoris', function (Blueprint $table) {
             $table->integer('kode_kategori')->primary();
             $table->string('nama_kategori')->unique();
-            $table->integer('syarat_masa_dinas');
+            $table->integer('syarat_masa_dinas')->nullable();
             $table->timestamps();
         });
     }

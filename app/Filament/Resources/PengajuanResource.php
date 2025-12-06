@@ -41,7 +41,7 @@ class PengajuanResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 3; 
+        return 3;
     }
 
     public static function form(Form $form): Form
@@ -63,7 +63,7 @@ class PengajuanResource extends Resource
                 Forms\Components\Select::make('kategori_kode_kategori')
                     ->label('Tanda Kehormatan')
                     ->relationship('kategori', 'nama_kategori') // tampilkan nama_kategori di dropdown
-                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nama_kategori} ({$record->syarat_masa_dinas} Tahun)")
+                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->nama_kategori} ({$record->syarat_masa_dinas} Tahun)")
                     ->searchable()
                     ->preload()
                     ->required()
@@ -92,14 +92,15 @@ class PengajuanResource extends Resource
                     ->disk('public')
                     ->directory('sk-tmt')
                     ->getUploadedFileNameForStorageUsing(
-                        fn (TemporaryUploadedFile $file): string => (string) str('tmt-'
-                            . (
-                                Auth::user()->nrp 
-                                ?? Auth::user()->personel->nrp 
-                                ?? 'unknown'                  // fallback jika belum ada nrp
-                            ) . '-'
-                            . now()->format('YmdHis') . '.'             // tanggal dan waktu upload
-                            . $file->getClientOriginalExtension()       // ambil ekstensi file asli
+                        fn(TemporaryUploadedFile $file): string => (string) str(
+                            'tmt-'
+                                . (
+                                    Auth::user()->nrp
+                                    ?? Auth::user()->personel->nrp
+                                    ?? 'unknown'                  // fallback jika belum ada nrp
+                                ) . '-'
+                                . now()->format('YmdHis') . '.'             // tanggal dan waktu upload
+                                . $file->getClientOriginalExtension()       // ambil ekstensi file asli
                         ),
                     ),
                 FileUpload::make('sk_pangkat')
@@ -108,14 +109,15 @@ class PengajuanResource extends Resource
                     ->disk('public')
                     ->directory('sk-pangkat')
                     ->getUploadedFileNameForStorageUsing(
-                        fn (TemporaryUploadedFile $file): string => (string) str('pangkat-'
-                            . (
-                                Auth::user()->nrp 
-                                ?? Auth::user()->personel->nrp 
-                                ?? 'unknown'                  
-                            ) . '-'
-                            . now()->format('YmdHis') . '.'             // tanggal dan waktu upload
-                            . $file->getClientOriginalExtension()       // ambil ekstensi file asli
+                        fn(TemporaryUploadedFile $file): string => (string) str(
+                            'pangkat-'
+                                . (
+                                    Auth::user()->nrp
+                                    ?? Auth::user()->personel->nrp
+                                    ?? 'unknown'
+                                ) . '-'
+                                . now()->format('YmdHis') . '.'             // tanggal dan waktu upload
+                                . $file->getClientOriginalExtension()       // ambil ekstensi file asli
                         ),
                     ),
                 FileUpload::make('sk_jabatan')
@@ -124,14 +126,15 @@ class PengajuanResource extends Resource
                     ->disk('public')
                     ->directory('sk-jabatan')
                     ->getUploadedFileNameForStorageUsing(
-                        fn (TemporaryUploadedFile $file): string => (string) str('jabatan-'
-                            . (
-                                Auth::user()->nrp 
-                                ?? Auth::user()->personel->nrp 
-                                ?? 'unknown'                  // fallback jika belum ada nrp
-                            ) . '-'
-                            . now()->format('YmdHis') . '.'             // tanggal dan waktu upload
-                            . $file->getClientOriginalExtension()       // ambil ekstensi file asli
+                        fn(TemporaryUploadedFile $file): string => (string) str(
+                            'jabatan-'
+                                . (
+                                    Auth::user()->nrp
+                                    ?? Auth::user()->personel->nrp
+                                    ?? 'unknown'                  // fallback jika belum ada nrp
+                                ) . '-'
+                                . now()->format('YmdHis') . '.'             // tanggal dan waktu upload
+                                . $file->getClientOriginalExtension()       // ambil ekstensi file asli
                         ),
                     ),
                 FileUpload::make('drh')
@@ -145,21 +148,22 @@ class PengajuanResource extends Resource
                     ->disk('public')
                     ->directory('drh')
                     ->getUploadedFileNameForStorageUsing(
-                        fn (TemporaryUploadedFile $file): string => (string) str('drh-'
-                            . (
-                                Auth::user()->nrp 
-                                ?? Auth::user()->personel->nrp 
-                                ?? 'unknown'                  // fallback jika belum ada nrp
-                            ) . '-'
-                            . now()->format('YmdHis') . '.'             // tanggal dan waktu upload
-                            . $file->getClientOriginalExtension()       // ambil ekstensi file asli
+                        fn(TemporaryUploadedFile $file): string => (string) str(
+                            'drh-'
+                                . (
+                                    Auth::user()->nrp
+                                    ?? Auth::user()->personel->nrp
+                                    ?? 'unknown'                  // fallback jika belum ada nrp
+                                ) . '-'
+                                . now()->format('YmdHis') . '.'             // tanggal dan waktu upload
+                                . $file->getClientOriginalExtension()       // ambil ekstensi file asli
                         ),
                     ),
                 // Forms\Components\TextArea::make('catatan')
                 //     ->label('Catatan Penolakan')
                 //     ->visible(fn ($record) => $record->status === 'Ditolak')
                 //     ->disabled(),
-                    
+
                 // Forms\Components\TextInput::make('status')
                 //     ->required()
                 //     ->maxLength(255)
@@ -175,11 +179,27 @@ class PengajuanResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('personel_nrp')
                     ->label('NRP')
-                    ->searchable(),
+                    ->searchable()
+                    ->visible(function (): bool {
+                        $user = Auth::user();
+                        // Filter terlihat jika user adalah bagwatpers ATAU renmin
+                        return $user && ($user->hasRole('bagwatpers') || $user->hasRole('renmin'));
+                    }),
                 Tables\Columns\TextColumn::make('personel.user.name')
                     ->label('Nama')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()->visible(function (): bool {
+                        $user = Auth::user();
+                        // Filter terlihat jika user adalah bagwatpers ATAU renmin
+                        return $user && ($user->hasRole('bagwatpers') || $user->hasRole('renmin'));
+                    })
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 150px;' 
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 150px;' 
+                    ]),
                 Tables\Columns\TextColumn::make('periode_tahun')
                     ->label('Periode')
                     ->alignment('center')
@@ -187,14 +207,22 @@ class PengajuanResource extends Resource
                 Tables\Columns\TextColumn::make('kategori.nama_kategori')
                     ->label('Tanda Kehormatan')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 200px;' // Atur lebar maksimum header kolom
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 200px;' // Atur lebar maksimum sel data
+                    ]),
                 Tables\Columns\TextColumn::make('surat_tanda_kehormatan')
                     ->label('Nomor dan Tanggal Keppres')
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('tanggal_pengajuan')
                     ->label('Tanggal Pengajuan')
-                    ->alignment('center')
-                    ->date('d F Y')
+                    ->alignCenter()
+                    ->date('d-m-Y')
                     ->sortable(),
                 // Tables\Columns\TextColumn::make('sk_tmt')
                 //     ->label('SK TMT Pertama')
@@ -258,13 +286,13 @@ class PengajuanResource extends Resource
                         // Filter terlihat jika user adalah bagwatpers ATAU renmin
                         return $user && ($user->hasRole('bagwatpers') || $user->hasRole('renmin'));
                     }),
-                    
+
                 // ✨ FILTER BERDASARKAN KATEGORI (Tabel/Model KategoriTandaKehormatan) ✨
                 SelectFilter::make('kategori.nama_kategori')
                     ->label('Filter Kategori')
                     // Asumsi relasi di model Pengajuan adalah 'kategori' 
                     // dan field nama di model KategoriTandaKehormatan adalah 'nama_kategori'
-                    ->relationship('kategori', 'nama_kategori') 
+                    ->relationship('kategori', 'nama_kategori')
                     ->searchable()
                     ->preload()
                     ->visible(function (): bool {
@@ -282,51 +310,52 @@ class PengajuanResource extends Resource
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->button()
-                    ->visible(fn ($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']) && $record->status === 'Menunggu Verifikasi')
+                    ->visible(fn($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']) && $record->status === 'Menunggu Verifikasi')
                     ->requiresConfirmation()
                     ->action(function (Pengajuan $record) {
                         $record->update(['status' => 'Terverifikasi']);
                         Notification::make()
-                                ->title('Pengajuan berhasil diverifikasi.')
-                                ->success()
-                                ->send();
+                            ->title('Pengajuan berhasil diverifikasi.')
+                            ->success()
+                            ->send();
                     }),
                 Tables\Actions\Action::make('ajukan')
                     ->label('Ajukan')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->button()
-                    ->visible(fn ($record) => auth()->user()->hasRole('bagwatpers') && $record->status === 'Terverifikasi')
+                    ->visible(fn($record) => auth()->user()->hasRole('bagwatpers') && $record->status === 'Terverifikasi')
                     ->requiresConfirmation()
                     ->action(function (Pengajuan $record) {
                         $record->update(['status' => 'Proses Pengajuan']);
                         Notification::make()
-                                ->title('Pengajuan berhasil diproses.')
-                                ->success()
-                                ->send();
+                            ->title('Pengajuan berhasil diproses.')
+                            ->success()
+                            ->send();
                     }),
                 Tables\Actions\Action::make('disetujui')
                     ->label('Setujui')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->button()
-                    ->visible(fn ($record) => auth()->user()->hasRole('bagwatpers') && $record->status === 'Proses Pengajuan')
+                    ->visible(fn($record) => auth()->user()->hasRole('bagwatpers') && $record->status === 'Proses Pengajuan')
                     ->requiresConfirmation()
                     ->action(function (Pengajuan $record) {
                         $record->update(['status' => 'Selesai']);
                         Notification::make()
-                                ->title('Pengajuan berhasil diselesaikan.')
-                                ->success()
-                                ->send();
+                            ->title('Pengajuan berhasil diselesaikan.')
+                            ->success()
+                            ->send();
                     }),
                 Tables\Actions\Action::make('tolak')
                     ->label('Tolak')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->button()
-                    ->visible(fn ($record) =>
+                    ->visible(
+                        fn($record) =>
                         auth()->user()->hasRole(['renmin', 'bagwatpers']) &&
-                        in_array($record->status, ['Menunggu Verifikasi', 'Proses Pengajuan'])
+                            in_array($record->status, ['Menunggu Verifikasi', 'Proses Pengajuan'])
                     )
                     ->requiresConfirmation()
                     ->form([
@@ -339,16 +368,16 @@ class PengajuanResource extends Resource
                     ->action(function (Pengajuan $record, array $data) {
                         $record->update(['status' => 'Ditolak', 'catatan' => $data['catatan']]);
                         Notification::make()
-                                ->title('Pengajuan berhasil ditolak.')
-                                ->success()
-                                ->send();
+                            ->title('Pengajuan berhasil ditolak.')
+                            ->success()
+                            ->send();
                     }),
-                    Tables\Actions\Action::make('buatSurat')
+                Tables\Actions\Action::make('buatSurat')
                     ->label('Buat Surat')
                     ->icon('heroicon-o-document-text')
                     ->color('primary')
                     ->button()
-                    ->visible(fn ($record) => auth()->user()->hasRole('renmin') && $record->status === 'Selesai')
+                    ->visible(fn($record) => auth()->user()->hasRole('renmin') && $record->status === 'Selesai')
                     ->action(function ($record, $livewire) {
                         return redirect()->route(
                             'filament.sitanhor.resources.surat-tanda-kehormatans.create',
@@ -362,7 +391,7 @@ class PengajuanResource extends Resource
                     }),
                 Tables\Actions\DeleteAction::make()
                     ->iconButton()
-                    ->visible(fn () => auth()->user()->hasRole('bagwatpers'))
+                    ->visible(fn() => auth()->user()->hasRole('bagwatpers'))
                     ->requiresConfirmation()
                     ->successNotification(
                         Notification::make()
@@ -383,10 +412,10 @@ class PengajuanResource extends Resource
                         ->label('Verifikasi Terpilih')
                         ->icon('heroicon-o-check-badge')
                         ->color('success')
-                        ->visible(fn () => auth()->user()->hasRole(['renmin', 'bagwatpers']))
+                        ->visible(fn() => auth()->user()->hasRole(['renmin', 'bagwatpers']))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
-                            if ($records->contains(fn ($record) => $record->status !== 'Menunggu Verifikasi')) {
+                            if ($records->contains(fn($record) => $record->status !== 'Menunggu Verifikasi')) {
                                 Notification::make()
                                     ->title('Hanya data dengan status "Menunggu Verifikasi" yang dapat diverifikasi.')
                                     ->danger()
@@ -399,15 +428,15 @@ class PengajuanResource extends Resource
                                 ->success()
                                 ->send();
                         }),
-                    
+
                     Tables\Actions\BulkAction::make('bulkAjukan')
                         ->label('Ajukan Terpilih')
                         ->icon('heroicon-o-check-badge')
                         ->color('success')
-                        ->visible(fn () => auth()->user()->hasRole('bagwatpers'))
+                        ->visible(fn() => auth()->user()->hasRole('bagwatpers'))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
-                            if ($records->contains(fn ($record) => $record->status !== 'Terverifikasi')) {
+                            if ($records->contains(fn($record) => $record->status !== 'Terverifikasi')) {
                                 Notification::make()
                                     ->title('Hanya data dengan status Terverifikasi yang dapat diajukan.')
                                     ->danger()
@@ -423,23 +452,22 @@ class PengajuanResource extends Resource
 
                     // 🗑️ BULK DELETE → hanya untuk bagwatpers
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->hasRole('bagwatpers'))
+                        ->visible(fn() => auth()->user()->hasRole('bagwatpers'))
                         ->requiresConfirmation()
                         ->successNotificationTitle('Pengajuan berhasil dihapus!'),
 
                     // ❌ FORCE DELETE → hanya bagwatpers
                     Tables\Actions\ForceDeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->hasRole('bagwatpers'))
+                        ->visible(fn() => auth()->user()->hasRole('bagwatpers'))
                         ->requiresConfirmation(),
 
                     // 🔁 RESTORE → hanya bagwatpers
                     Tables\Actions\RestoreBulkAction::make()
-                        ->visible(fn () => auth()->user()->hasRole('bagwatpers')),
+                        ->visible(fn() => auth()->user()->hasRole('bagwatpers')),
                 ]),
             ])
             ->paginationPageOptions([50, 100, 200, 'all']) // Mendefinisikan semua opsi yang tersedia
             ->defaultPaginationPageOption(50);
-
     }
 
     public static function getRelations(): array

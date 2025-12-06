@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Filters\SelectFilter;
 
 class PersonelResource extends Resource
 {
@@ -56,12 +57,12 @@ class PersonelResource extends Resource
                     ->required()
                     ->maxLength(50),
                 Forms\Components\TextInput::make('user.name')
-                    ->label('Nama Lengkap')
+                    ->label('Nama Lengkap (Beserta Gelar)')
                     ->maxLength(50),
                 Forms\Components\Select::make('kode_satker')
                     ->label('Satuan Kerja')
                     ->relationship('satker', 'nama_satker') // tampilkan nama_satker di dropdown
-                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nama_satker} - {$record->kode_satker}")
+                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nama_satker}")
                     ->searchable()
                     ->preload()
                     ->required(),
@@ -130,8 +131,18 @@ class PersonelResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->emptyStateHeading('Tidak Ada Data Personel')
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TrashedFilter::make()->label('Data yang Dihapus'),
+                SelectFilter::make('kode_satker')
+                    ->label('Filter Berdasarkan Satker')
+                    // Menggunakan relasi 'satker' di model Personel
+                    ->relationship('satker', 'nama_satker') 
+                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nama_satker}")
+                    ->searchable()
+                    ->preload()
+                    // Visibilitas: Hanya untuk Bagwatpers dan Renmin
+                    ->visible(fn () => Auth::user()->hasRole(['bagwatpers', 'renmin'])),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()->iconButton(),

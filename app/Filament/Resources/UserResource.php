@@ -65,7 +65,7 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('Role')
-                    ->searchable(),
+                    ->sortable(),
                 // Tables\Columns\TextColumn::make('email_verified_at')
                 //     ->dateTime()
                 //     ->sortable(),
@@ -82,7 +82,7 @@ class UserResource extends Resource
                 Tables\Filters\TrashedFilter::make()->label('Data yang Dihapus'),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                Tables\Actions\ViewAction::make()->iconButton(),
                 Tables\Actions\EditAction::make()
                     ->iconButton(),
             ])

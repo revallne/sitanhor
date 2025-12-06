@@ -42,7 +42,6 @@ class KategoriResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('syarat_masa_dinas')
                     ->label('Syarat Masa Dinas (dalam tahun)')
-                    ->required()
                     ->numeric(),
             ]);
     }
@@ -60,8 +59,10 @@ class KategoriResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('syarat_masa_dinas')
                     ->label('Syarat Masa Dinas')
+                    ->alignCenter()
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => $state ? $state . ' tahun' : '-'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
