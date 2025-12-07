@@ -27,7 +27,7 @@ class PersonelResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 2; 
+        return 2;
     }
 
     public static function getNavigationLabel(): string
@@ -55,14 +55,24 @@ class PersonelResource extends Resource
                     ->label('Email Terdaftar')
                     ->email()
                     ->required()
-                    ->maxLength(50),
+                    ->maxLength(50)
+                    ->rules([
+                        'required',
+                        'email',
+                        // Rule: harus ada di tabel 'users' pada kolom 'email'
+                        'exists:users,email',
+                    ])
+                    ->validationMessages([
+                        // Pesan error kustom untuk rule 'exists'
+                        'exists' => 'Email ini tidak terdaftar sebagai akun pengguna.',
+                    ]),
                 Forms\Components\TextInput::make('user.name')
                     ->label('Nama Lengkap (Beserta Gelar)')
                     ->maxLength(50),
                 Forms\Components\Select::make('kode_satker')
                     ->label('Satuan Kerja')
                     ->relationship('satker', 'nama_satker') // tampilkan nama_satker di dropdown
-                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nama_satker}")
+                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->nama_satker}")
                     ->searchable()
                     ->preload()
                     ->required(),
@@ -71,7 +81,7 @@ class PersonelResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('pangkat')
                     ->required()
-                    ->dehydrateStateUsing(fn ($state) => ucwords(strtolower($state)))
+                    ->dehydrateStateUsing(fn($state) => ucwords(($state)))
                     ->maxLength(30),
                 Forms\Components\TextInput::make('jabatan')
                     ->required()
@@ -79,7 +89,7 @@ class PersonelResource extends Resource
                 Forms\Components\TextInput::make('tempat_lahir')
                     ->label('Tempat Lahir')
                     ->required()
-                    ->dehydrateStateUsing(fn ($state) => ucwords(strtolower($state)))
+                    ->dehydrateStateUsing(fn($state) => ucwords(strtolower($state)))
                     ->maxLength(30),
                 Forms\Components\DatePicker::make('tanggal_lahir')
                     ->label('Tanggal Lahir')
@@ -97,7 +107,14 @@ class PersonelResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Nama')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 200px;'
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 200px;'
+                    ]),
                 Tables\Columns\TextColumn::make('satker.nama_satker')
                     ->label('Satuan Kerja')
                     ->searchable()
@@ -109,7 +126,14 @@ class PersonelResource extends Resource
                 Tables\Columns\TextColumn::make('pangkat')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('jabatan')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 200px;'
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 200px;'
+                    ]),
                 // Tables\Columns\TextColumn::make('ttl')
                 //     ->label('Tempat, Tanggal Lahir')
                 //     ->getStateUsing(fn ($record) => 
@@ -137,12 +161,12 @@ class PersonelResource extends Resource
                 SelectFilter::make('kode_satker')
                     ->label('Filter Berdasarkan Satker')
                     // Menggunakan relasi 'satker' di model Personel
-                    ->relationship('satker', 'nama_satker') 
-                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nama_satker}")
+                    ->relationship('satker', 'nama_satker')
+                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->nama_satker}")
                     ->searchable()
                     ->preload()
                     // Visibilitas: Hanya untuk Bagwatpers dan Renmin
-                    ->visible(fn () => Auth::user()->hasRole(['bagwatpers', 'renmin'])),
+                    ->visible(fn() => Auth::user()->hasRole(['bagwatpers'])),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()->iconButton(),
@@ -216,7 +240,4 @@ class PersonelResource extends Resource
         // Default → tidak ada akses
         return $query->whereRaw('1 = 0');
     }
-
-    
-
 }

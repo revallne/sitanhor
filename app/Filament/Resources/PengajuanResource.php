@@ -26,6 +26,9 @@ use Illuminate\Support\Collection;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Actions\ExportAction;
 use App\Filament\Exports\PengajuanExporter;
+use App\Models\Personel;
+use App\Models\Kategori;
+use Carbon\Carbon;
 
 class PengajuanResource extends Resource
 {
@@ -63,22 +66,54 @@ class PengajuanResource extends Resource
                 Forms\Components\Select::make('kategori_kode_kategori')
                     ->label('Tanda Kehormatan')
                     ->relationship('kategori', 'nama_kategori') // tampilkan nama_kategori di dropdown
-                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->nama_kategori} ({$record->syarat_masa_dinas} Tahun)")
+                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->nama_kategori}")
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->rule(function ($get) {
-                        return function (string $attribute, $value, $fail) use ($get) {
-                            $exists = Pengajuan::where('personel_nrp', auth()->user()->personel_nrp)
-                                ->where('periode_tahun', $get('periode_tahun'))
-                                ->where('kategori_kode_kategori', $value)
-                                ->exists();
+                    ->rules([
+                        function (Forms\Get $get, $state) {
+                            return function (string $attribute, $value, $fail) use ($get, $state) {
+                                
+                                $user = auth()->user();
+                                $personelNrp = $user->personel->nrp ?? null;
+                                $periodeTahun = $get('periode_tahun');
 
-                            if ($exists) {
-                                $fail('Anda sudah mengajukan kategori ini pada periode tersebut.');
-                            }
-                        };
-                    }),
+                                if (!$personelNrp || !$value || !$periodeTahun) {
+                                    return; // Lewati jika data kunci belum lengkap
+                                }
+
+                                $personel = Personel::where('nrp', $personelNrp)->first();
+                                $kategori = Kategori::where('kode_kategori', $state)->first();
+
+                                if (!$personel || !$kategori) {
+                                    return; 
+                                }
+
+                                // --- Pengecekan 1: Syarat Masa Dinas ---
+                                $tmtPertama = Carbon::parse($personel->tmt_pertama);
+                                $masaDinasTahun = $tmtPertama->diffInYears(Carbon::now());
+                                $syaratMinimal = $kategori->syarat_masa_dinas;
+
+                                if ($masaDinasTahun < $syaratMinimal) {
+                                    $message = "Syarat minimal masa dinas untuk kategori '{$kategori->nama_kategori}' adalah {$syaratMinimal} tahun.";
+                                    $fail($message);
+                                    return; // Hentikan validasi jika syarat dinas tidak terpenuhi
+                                }
+
+                                // --- Pengecekan 2: Duplikasi Pengajuan ---
+                                $exists = Pengajuan::where('personel_nrp', $personelNrp)
+                                    ->where('periode_tahun', $periodeTahun)
+                                    ->where('kategori_kode_kategori', $value)
+                                    // Boleh mengajukan lagi jika statusnya Ditolak
+                                    ->whereNotIn('status', ['Ditolak']) 
+                                    ->exists();
+
+                                if ($exists) {
+                                    $fail('Anda sudah memiliki pengajuan yang sedang diproses/telah disetujui untuk kategori ini pada periode yang sama.');
+                                }
+                            };
+                        },
+                    ]),
                 Forms\Components\TextInput::make('surat_tanda_kehormatan')
                     ->label('Nomor dan Tanggal Keppres Nomor Tanda Kehormatan Terakhir')
                     ->helperText('Contoh: Keppres Nomor 39/TK/TAHUN 2021 tanggal 1 Januari 2021')
@@ -91,6 +126,7 @@ class PengajuanResource extends Resource
                     ->acceptedFileTypes(['application/pdf'])
                     ->disk('public')
                     ->directory('sk-tmt')
+                    ->required()
                     ->getUploadedFileNameForStorageUsing(
                         fn(TemporaryUploadedFile $file): string => (string) str(
                             'tmt-'
@@ -108,6 +144,7 @@ class PengajuanResource extends Resource
                     ->acceptedFileTypes(['application/pdf'])
                     ->disk('public')
                     ->directory('sk-pangkat')
+                    ->required()
                     ->getUploadedFileNameForStorageUsing(
                         fn(TemporaryUploadedFile $file): string => (string) str(
                             'pangkat-'
@@ -125,6 +162,7 @@ class PengajuanResource extends Resource
                     ->acceptedFileTypes(['application/pdf'])
                     ->disk('public')
                     ->directory('sk-jabatan')
+                    ->required()
                     ->getUploadedFileNameForStorageUsing(
                         fn(TemporaryUploadedFile $file): string => (string) str(
                             'jabatan-'
@@ -147,6 +185,7 @@ class PengajuanResource extends Resource
                     ->acceptedFileTypes(['application/pdf'])
                     ->disk('public')
                     ->directory('drh')
+                    ->required()
                     ->getUploadedFileNameForStorageUsing(
                         fn(TemporaryUploadedFile $file): string => (string) str(
                             'drh-'
@@ -195,10 +234,10 @@ class PengajuanResource extends Resource
                     })
                     ->wrap()
                     ->extraHeaderAttributes([
-                        'style' => 'width: 150px;' 
+                        'style' => 'width: 200px;' 
                     ])
                     ->extraAttributes([
-                        'style' => 'width: 150px;' 
+                        'style' => 'width: 200px;' 
                     ]),
                 Tables\Columns\TextColumn::make('periode_tahun')
                     ->label('Periode')

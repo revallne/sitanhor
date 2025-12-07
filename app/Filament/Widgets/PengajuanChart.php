@@ -69,10 +69,13 @@ class PengajuanChart extends ChartWidget
                 [
                     'label' => "Total Pengajuan ({$currentYear})",
                     'data' => $counts,
-                    'backgroundColor' => [
-                        // Warna kustom
-                        '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#6366F1' 
-                    ],
+                    // ✨ MODIFIKASI INI ✨
+                    // Ganti array warna dengan satu nilai Hex warna Primary Anda
+                    'backgroundColor' => '#7E481C', 
+                    
+                    // Tambahkan border agar lebih jelas (opsional)
+                    'borderColor' => '#7E481C', 
+                    'borderWidth' => 1,
                 ],
             ],
             'labels' => $labels,

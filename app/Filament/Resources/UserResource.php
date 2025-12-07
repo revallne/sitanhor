@@ -59,10 +59,24 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 400px;'
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 400px;'
+                    ]),
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 300px;'
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 300px;'
+                    ]),
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('Role')
                     ->sortable(),

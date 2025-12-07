@@ -61,12 +61,33 @@ class SatkerResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('nama_satker')
                     ->label('Nama Satuan Kerja')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 250px;' 
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 250px;' 
+                    ]),
                 Tables\Columns\TextColumn::make('user_email')
                     ->label('Akun')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 300px;' 
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 300px;' 
+                    ]),
                 Tables\Columns\TextColumn::make('deskripsi')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 300px;' 
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 300px;' 
+                    ]),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

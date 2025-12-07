@@ -101,24 +101,48 @@ class SuratTandaKehormatanResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('pengajuan.personel_nrp')
                     ->label('NRP')
-                    ->searchable(),
+                    ->searchable()
+                    ->visible(fn () => !auth()->user()->hasRole('personel')),
                 Tables\Columns\TextColumn::make('pengajuan.personel.user.name')
                     ->label('Nama')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 200px;' 
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 200px;' 
+                    ])
+                    ->visible(fn () => !auth()->user()->hasRole('personel')),
                 Tables\Columns\TextColumn::make('pengajuan.periode_tahun')
                     ->label('Periode')
-                    ->sortable(),
+                    ->visible(fn () => !auth()->user()->hasRole('personel'))
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('pengajuan.kategori.nama_kategori')
                     ->label('Kategori')
                     ->sortable()
-                    ->visible(fn () => !auth()->user()->hasRole('personel')),
+                    ->alignCenter()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 200px;' 
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 200px;' 
+                    ]),
                 Tables\Columns\TextColumn::make('noKepres')
                     ->label('Nomor Keppres')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('tanggalKepres')
-                    ->label('Tanggal Keppres')
-                    ->date('d F Y'),
+                    ->searchable()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 250px;' 
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 250px;' 
+                    ]),
+                // Tables\Columns\TextColumn::make('tanggalKepres')
+                //     ->label('Tanggal Keppres')
+                //     ->date('d F Y'),
                 // Tables\Columns\TextColumn::make('file_surat')
                 //     ->label('File Surat')
                 //     ->alignCenter()

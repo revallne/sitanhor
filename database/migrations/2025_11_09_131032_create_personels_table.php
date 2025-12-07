@@ -24,7 +24,7 @@ return new class extends Migration
             
             // FK ke Satker
             $table->integer('kode_satker');
-            $table->foreign('kode_satker')->references('kode_satker')->on('satkers')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreign('kode_satker')->references('kode_satker')->on('satkers')->onDelete('cascade')->onUpdate('cascade');
 
             // Data diri sesuai ERD
             $table->date('tmt_pertama'); // tmtPertama
