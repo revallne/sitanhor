@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Support\Carbon;
 
 class PersonelResource extends Resource
 {
@@ -68,7 +69,8 @@ class PersonelResource extends Resource
                     ]),
                 Forms\Components\TextInput::make('user.name')
                     ->label('Nama Lengkap (Beserta Gelar)')
-                    ->maxLength(50),
+                    ->maxLength(100)
+                    ->dehydrateStateUsing(fn($state) => ucwords(($state))),
                 Forms\Components\Select::make('kode_satker')
                     ->label('Satuan Kerja')
                     ->relationship('satker', 'nama_satker') // tampilkan nama_satker di dropdown
@@ -85,6 +87,7 @@ class PersonelResource extends Resource
                     ->maxLength(30),
                 Forms\Components\TextInput::make('jabatan')
                     ->required()
+                    ->dehydrateStateUsing(fn($state) => ucwords(($state)))
                     ->maxLength(100),
                 Forms\Components\TextInput::make('tempat_lahir')
                     ->label('Tempat Lahir')
@@ -103,61 +106,66 @@ class PersonelResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('nrp')
                     ->label('NRP')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap()
+                    ->extraAttributes(['class' => 'whitespace-normal']),
+
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Nama')
                     ->searchable()
                     ->sortable()
                     ->wrap()
-                    ->extraHeaderAttributes([
-                        'style' => 'width: 200px;'
-                    ])
-                    ->extraAttributes([
-                        'style' => 'width: 200px;'
-                    ]),
+                    ->extraAttributes(['class' => 'whitespace-normal w-48']) // sekitar 200px
+                    ->extraHeaderAttributes(['class' => 'w-48']),
+
                 Tables\Columns\TextColumn::make('satker.nama_satker')
                     ->label('Satuan Kerja')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->wrap()
+                    ->extraAttributes(['class' => 'whitespace-normal w-32'])
+                    ->extraHeaderAttributes(['class' => 'w-32']),
+
                 Tables\Columns\TextColumn::make('tmt_pertama')
                     ->label('TMT Pertama')
                     ->alignment('center')
-                    ->date('d-m-Y'),
+                    ->formatStateUsing(
+                        fn($state) =>
+                        $state ? Carbon::parse($state)->locale('id')->translatedFormat('d M Y') : null
+                    ),
+
                 Tables\Columns\TextColumn::make('pangkat')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap()
+                    ->extraAttributes(['class' => 'whitespace-normal w-40'])
+                    ->extraHeaderAttributes(['class' => 'w-40']),
+
                 Tables\Columns\TextColumn::make('jabatan')
                     ->searchable()
                     ->wrap()
-                    ->extraHeaderAttributes([
-                        'style' => 'width: 200px;'
-                    ])
-                    ->extraAttributes([
-                        'style' => 'width: 200px;'
-                    ]),
-                // Tables\Columns\TextColumn::make('ttl')
-                //     ->label('Tempat, Tanggal Lahir')
-                //     ->getStateUsing(fn ($record) => 
-                //         "{$record->tempat_lahir}, " . \Carbon\Carbon::parse($record->tanggal_lahir)->format('Y-m-d')
-                //     ),
-                // Tables\Columns\TextColumn::make('user_email')
-                //     ->label('Email')
-                //     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->extraAttributes(['class' => 'whitespace-normal w-52'])
+                    ->extraHeaderAttributes(['class' => 'w-52']),
+
+                // Tables\Columns\TextColumn::make('created_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+
+                // Tables\Columns\TextColumn::make('updated_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+
+                // Tables\Columns\TextColumn::make('deleted_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->emptyStateHeading('Tidak Ada Data Personel')
             ->filters([
-                Tables\Filters\TrashedFilter::make()->label('Data yang Dihapus'),
+                Tables\Filters\TrashedFilter::make()
+                    ->label('Data yang Dihapus')->visible(fn() => Auth::user()
+                        ->hasRole('bagwatpers')),
                 SelectFilter::make('kode_satker')
                     ->label('Filter Berdasarkan Satker')
                     // Menggunakan relasi 'satker' di model Personel
@@ -166,7 +174,7 @@ class PersonelResource extends Resource
                     ->searchable()
                     ->preload()
                     // Visibilitas: Hanya untuk Bagwatpers dan Renmin
-                    ->visible(fn() => Auth::user()->hasRole(['bagwatpers'])),
+                    ->visible(fn() => Auth::user()->hasRole('bagwatpers')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()->iconButton(),
@@ -177,7 +185,7 @@ class PersonelResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
-                ]),
+                ])->visible(fn() => Auth::user()->hasRole('bagwatpers')),
             ])
             ->paginationPageOptions([50, 100, 200, 'all']) // Mendefinisikan semua opsi yang tersedia
             ->defaultPaginationPageOption(50);

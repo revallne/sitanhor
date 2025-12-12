@@ -34,4 +34,15 @@ class CreateSuratTandaKehormatan extends CreateRecord
         return $data;
     }
 
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction()
+                ->label('Simpan Data Baru'), // Mengubah label "Create"
+                
+            $this->getCancelFormAction()
+                ->label('Batalkan'), // Mengubah label "Cancel"
+        ];
+    }
+
 }

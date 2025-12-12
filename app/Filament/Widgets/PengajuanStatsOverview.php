@@ -6,8 +6,6 @@ use App\Models\Pengajuan;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Support\Enums\IconPosition;
-use App\Models\Kategori;
-use Filament\Widgets\ChartWidget;
 use Carbon\Carbon;
 
 class PengajuanStatsOverview extends BaseWidget
@@ -16,75 +14,86 @@ class PengajuanStatsOverview extends BaseWidget
     {
         $user = auth()->user();
 
+        // Personel tidak melihat dashboard
         if ($user->hasRole('personel')) {
             return [];
         }
 
-        // 1. Tentukan tahun saat ini
         $currentYear = Carbon::now()->year;
 
-        // 2. Inisialisasi Query Dasar (Akses Semua)
-        $query = Pengajuan::query();
-        
-        // Jika user adalah RENMIN → filter berdasarkan satkernya
-        if ($user->hasRole('renmin')) {
-            // Ambil kode satker renmin (asumsi sudah ada relasi user->satker)
-            $userSatker = $user->satker->kode_satker ?? null;
+        // -------------------------------
+        // BASE QUERY
+        // -------------------------------
+        $query = Pengajuan::query()->where('periode_tahun', $currentYear);
 
-            if ($userSatker) {
-                 $query->whereHas('personel', function ($q) use ($userSatker) {
-                    $q->where('kode_satker', $userSatker);
-                });
-            } else {
-                // Jika renmin tidak punya satker, kosongkan query
+        // Jika RENMIN → filter satker
+        if ($user->hasRole('renmin')) {
+            $satker = $user->satker->kode_satker ?? null;
+
+            if (! $satker) {
                 return [
-                    Stat::make('Menunggu Verifikasi', 0)->icon('heroicon-s-clock')->color('warning'),
+                    Stat::make('Menunggu Verifikasi', 0)
+                        ->icon('heroicon-s-clock')
+                        ->color('warning'),
                 ];
             }
-        } 
-        // Jika user adalah BAGWAT PERS → akses semua data
-        else {
-            $query = Pengajuan::query();
+
+            $query->whereHas('personel', function ($q) use ($satker) {
+                $q->where('kode_satker', $satker);
+            });
         }
 
-        $query->where('periode_tahun', $currentYear);
+        // -------------------------------
+        // Hitung semua status (lebih bersih)
+        // -------------------------------
+        $total     = $query->clone()->count();
+        $menunggu  = $query->clone()->where('status', 'Menunggu Verifikasi')->count();
+        $terverif  = $query->clone()->where('status', 'Terverifikasi')->count();
+        $proses    = $query->clone()->where('status', 'Proses Pengajuan')->count();
+        $selesai   = $query->clone()->where('status', 'Selesai')->count();
+        $ditolak   = $query->clone()->where('status', 'Ditolak')->count();
 
+        // -------------------------------
+        // Tampilan lebih cantik + warna konsisten
+        // -------------------------------
         return [
-            Stat::make(
-                'Menunggu Verifikasi', 
-                $query->clone()->where('status', 'Menunggu Verifikasi')->count()
-            )
+
+
+            Stat::make('Menunggu Verifikasi', $menunggu)
                 ->icon('heroicon-s-clock', IconPosition::Before)
-                ->color('warning'),
+                ->color('warning')
+                ->description('Menunggu validasi Renmin')
+                ->extraAttributes(['class' => 'shadow-md border']),
 
-            Stat::make(
-                'Terverifikasi', 
-                $query->clone()->where('status', 'Terverifikasi')->count()
-            )
+            Stat::make('Terverifikasi', $terverif)
                 ->icon('heroicon-s-check-circle', IconPosition::Before)
-                ->color('primary'),
+                ->color('success')
+                ->description('Sudah diverifikasi oleh Renmin')
+                ->extraAttributes(['class' => 'shadow-md border']),
 
-            Stat::make(
-                'Proses Pengajuan', 
-                $query->clone()->where('status', 'Proses Pengajuan')->count()
-            )
+            Stat::make('Proses Pengajuan', $proses)
                 ->icon('heroicon-s-cog', IconPosition::Before)
-                ->color('info'),
+                ->color('info')
+                ->description('Sedang diajukan ke Mabes Polri')
+                ->extraAttributes(['class' => 'shadow-md border']),
 
-            Stat::make(
-                'Selesai', 
-                $query->clone()->where('status', 'Selesai')->count()
-            )
+            Stat::make('Selesai', $selesai)
                 ->icon('heroicon-s-flag', IconPosition::Before)
-                ->color('success'),
+                ->color('success')
+                ->description('Pengajuan selesai')
+                ->extraAttributes(['class' => 'shadow-md border']),
 
-            Stat::make(
-                'Ditolak', 
-                $query->clone()->where('status', 'Ditolak')->count()
-            )
+            Stat::make('Ditolak', $ditolak)
                 ->icon('heroicon-s-x-circle', IconPosition::Before)
-                ->color('danger'),
+                ->color('danger')
+                ->description('Pengajuan ditolak')
+                ->extraAttributes(['class' => 'shadow-md border']),
+
+            Stat::make('Total Pengajuan', $total)
+                ->description('Jumlah semua pengajuan tahun ini')
+                ->icon('heroicon-s-clipboard-document-check')
+                ->color('primary')
+                ->extraAttributes(['class' => 'shadow-md border']),
         ];
     }
-
 }

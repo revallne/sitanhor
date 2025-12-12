@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\SuratTandaKehormatanResource\Pages;
 use App\Filament\Resources\SuratTandaKehormatanResource\RelationManagers;
 use App\Models\SuratTandaKehormatan;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -24,7 +25,7 @@ class SuratTandaKehormatanResource extends Resource
     protected static ?string $model = SuratTandaKehormatan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
-    
+
     protected static ?string $pluralModelLabel = 'Penerima Tanda Kehormatan';
 
     protected ?string $heading = 'Penerima Tanda Kehormatan';
@@ -34,9 +35,9 @@ class SuratTandaKehormatanResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 4; 
+        return 4;
     }
-        public static function getNavigationLabel(): string
+    public static function getNavigationLabel(): string
     {
         $user = auth()->user();
 
@@ -55,22 +56,30 @@ class SuratTandaKehormatanResource extends Resource
                     ->label('NRP Penerima')
                     ->default(request('nrp'))
                     ->required()
-                    ->maxLength(20),
+                    ->maxLength(20)
+                    ->disabled(fn($context) => $context === 'edit')      // disable saat edit
+                    ->dehydrated(fn($context) => $context !== 'edit'),
 
                 Forms\Components\Select::make('periode_tahun')
                     ->label('Periode')
                     ->default(request('periode'))
                     ->relationship('pengajuan.periode', 'tahun')
-                    ->required(),
+                    ->required()
+                    ->disabled(fn($context) => $context === 'edit')      // disable saat edit
+                    ->dehydrated(fn($context) => $context !== 'edit'),
+
 
                 Forms\Components\Select::make('kategori_kode_kategori')
                     ->label('Tanda Kehormatan')
                     ->default(request('kategori'))
                     ->relationship('pengajuan.kategori', 'nama_kategori')
-                    ->required(),
+                    ->required()
+                    ->disabled(fn($context) => $context === 'edit')      // disable saat edit
+                    ->dehydrated(fn($context) => $context !== 'edit'),
+
 
                 Forms\Components\Hidden::make('pengajuan_id')
-                 ->default(request('pengajuan_id')),
+                    ->default(request('pengajuan_id')),
 
                 Forms\Components\TextInput::make('noKepres')
                     ->label('Nomor Keppres')
@@ -88,7 +97,7 @@ class SuratTandaKehormatanResource extends Resource
                     ->getUploadedFileNameForStorageUsing(
                         function (TemporaryUploadedFile $file, $livewire): string {
                             $nrp = $livewire->data['nrp'] ?? 'unknown'; // ambil nilai dari input form 'nrp'
-                            
+
                             return 'tanhor-' . $nrp . '-' . now()->format('YmdHis') . '.' . $file->getClientOriginalExtension();
                         }
                     ),
@@ -102,98 +111,105 @@ class SuratTandaKehormatanResource extends Resource
                 Tables\Columns\TextColumn::make('pengajuan.personel_nrp')
                     ->label('NRP')
                     ->searchable()
-                    ->visible(fn () => !auth()->user()->hasRole('personel')),
+                    ->visible(fn() => !auth()->user()->hasRole('personel'))
+                    ->grow(false)
+                    ->width('90px')
+                    ->lineClamp(2),
+
                 Tables\Columns\TextColumn::make('pengajuan.personel.user.name')
                     ->label('Nama')
                     ->searchable()
                     ->sortable()
                     ->wrap()
-                    ->extraHeaderAttributes([
-                        'style' => 'width: 200px;' 
-                    ])
-                    ->extraAttributes([
-                        'style' => 'width: 200px;' 
-                    ])
-                    ->visible(fn () => !auth()->user()->hasRole('personel')),
+                    ->visible(fn() => !auth()->user()->hasRole('personel'))
+                    ->grow()
+                    ->width('250px') // kolom fleksibel, biar tidak mepet
+                    ->lineClamp(2),
+
                 Tables\Columns\TextColumn::make('pengajuan.periode_tahun')
                     ->label('Periode')
-                    ->visible(fn () => !auth()->user()->hasRole('personel'))
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->visible(fn() => !auth()->user()->hasRole('personel'))
+                    ->grow(false)
+                    ->width('80px'),
+
                 Tables\Columns\TextColumn::make('pengajuan.kategori.nama_kategori')
                     ->label('Kategori')
                     ->sortable()
-                    ->alignCenter()
                     ->wrap()
-                    ->extraHeaderAttributes([
-                        'style' => 'width: 200px;' 
-                    ])
-                    ->extraAttributes([
-                        'style' => 'width: 200px;' 
-                    ]),
+                    ->lineClamp(2)
+                    ->grow(false) // kolom panjang otomatis fleksibel
+                    ->width('250px'),
+
                 Tables\Columns\TextColumn::make('noKepres')
                     ->label('Nomor Keppres')
                     ->searchable()
                     ->wrap()
-                    ->extraHeaderAttributes([
-                        'style' => 'width: 250px;' 
-                    ])
-                    ->extraAttributes([
-                        'style' => 'width: 250px;' 
-                    ]),
-                // Tables\Columns\TextColumn::make('tanggalKepres')
-                //     ->label('Tanggal Keppres')
-                //     ->date('d F Y'),
-                // Tables\Columns\TextColumn::make('file_surat')
-                //     ->label('File Surat')
-                //     ->alignCenter()
-                //     ->url(fn ($record) => asset('storage/' . $record->file_surat)) // arahkan ke lokasi file di public/storage
-                //     ->openUrlInNewTab() // buka di tab baru
-                //     ->formatStateUsing(fn () => 'Lihat'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->lineClamp(2)
+                    ->grow()
+                    ->width('250px'),
+                Tables\Columns\TextColumn::make('tanggalKepres')
+                    ->label('Tanggal Keppres')
+                    ->visible(fn() => auth()->user()->hasRole('personel'))
+                    ->formatStateUsing(function ($state) {
+                        if (! $state) return null;
+                        return Carbon::parse($state)
+                            ->locale('id')
+                            ->translatedFormat('d F Y');
+                    })
+                    ->wrap()
+                    ->lineClamp(2)
+                    ->grow()
+                    ->width('250px'),
+
+                // Tables\Columns\TextColumn::make('created_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+
+                // Tables\Columns\TextColumn::make('updated_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+
+                // Tables\Columns\TextColumn::make('deleted_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->emptyStateHeading('Tidak Ada Tanda Kehormatan yang Diterima')
             ->filters([
-                Tables\Filters\TrashedFilter::make()->label('Data yang Dihapus'),
+                Tables\Filters\TrashedFilter::make()->label('Data yang Dihapus')->visible(fn() => auth()->user()->hasRole(['bagwatpers', 'renmin'])),
                 SelectFilter::make('periode_tahun')
                     ->label('Filter Berdasarkan Periode')
                     // Mengikuti relasi dari SuratTandaKehormatan -> Pengajuan -> Periode
-                    ->relationship('pengajuan.periode', 'tahun') 
+                    ->relationship('pengajuan.periode', 'tahun')
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->visible(fn() => auth()->user()->hasRole(['bagwatpers', 'renmin'])),
             ])
             ->actions([
-                
+
                 Tables\Actions\Action::make('lihat')
                     ->label('Lihat Surat')
                     ->color('info')
                     ->button()
-                    ->visible(fn () => auth()->user()->hasRole(['bagwatpers', 'renmin']))
-                    ->url(fn ($record) => asset('storage/' . $record->file_surat)) // arahkan ke lokasi file di public/storage
+                    ->visible(fn() => auth()->user()->hasRole(['bagwatpers', 'renmin']))
+                    ->url(fn($record) => asset('storage/' . $record->file_surat)) // arahkan ke lokasi file di public/storage
                     ->openUrlInNewTab(),
                 Tables\Actions\Action::make('download_personel')
                     ->label('Unduh Surat')
                     ->color('success') // Warna yang berbeda agar mudah dibedakan
                     ->icon('heroicon-o-arrow-down-tray') // Ikon download
                     ->button()
-                    ->url(fn ($record) => asset('storage/' . $record->file_surat))
-                    
+                    ->url(fn($record) => asset('storage/' . $record->file_surat))
+
                     // PENTING: Menambahkan atribut 'download' agar browser langsung mendownload
                     ->openUrlInNewTab()
                     ->extraAttributes([
-                        'download' => true, 
+                        'download' => true,
                     ])
-                    
+
                     // KONTROL VISIBILITY: Hanya terlihat untuk role 'personel'
                     ->visible(function () {
                         $user = auth()->user();
@@ -210,7 +226,7 @@ class SuratTandaKehormatanResource extends Resource
                     ->label('')
                     ->icon('heroicon-s-trash')
                     ->iconButton()
-                    ->visible(fn () => auth()->user()->hasRole(['bagwatpers', 'renmin']))
+                    ->visible(fn() => auth()->user()->hasRole(['bagwatpers', 'renmin']))
                     ->requiresConfirmation()
                     ->successNotification(
                         Notification::make()
@@ -222,7 +238,7 @@ class SuratTandaKehormatanResource extends Resource
                             ->title('Surat Tanda Kehormatan gagal dihapus.')
                             ->danger()
                     ),
-                
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -230,7 +246,7 @@ class SuratTandaKehormatanResource extends Resource
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                 ])
-                ->visible(fn () => auth()->user()->hasRole(['bagwatpers', 'renmin'])),
+                    ->visible(fn() => auth()->user()->hasRole(['bagwatpers', 'renmin'])),
             ])
             ->paginationPageOptions([50, 100, 200, 'all']) // Mendefinisikan semua opsi yang tersedia
             ->defaultPaginationPageOption(50);
@@ -299,5 +315,4 @@ class SuratTandaKehormatanResource extends Resource
         // Default → tidak boleh melihat apapun
         return $query->whereRaw('1 = 0');
     }
-
 }

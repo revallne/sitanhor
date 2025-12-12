@@ -43,7 +43,8 @@ class KategoriResource extends Resource
                 Forms\Components\TextInput::make('syarat_masa_dinas')
                     ->label('Syarat Masa Dinas (dalam tahun)')
                     ->numeric(),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -63,14 +64,14 @@ class KategoriResource extends Resource
                     ->numeric()
                     ->sortable()
                     ->formatStateUsing(fn ($state) => $state ? $state . ' tahun' : '-'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('created_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('updated_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

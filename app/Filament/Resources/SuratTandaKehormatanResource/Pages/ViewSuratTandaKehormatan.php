@@ -14,6 +14,11 @@ class ViewSuratTandaKehormatan extends ViewRecord
     {
         return [
             Actions\EditAction::make(),
+            Actions\Action::make('kembali')
+                ->label('Kembali')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url($this->getResource()::getUrl('index')),
         ];
     }
 }

@@ -35,7 +35,7 @@ class LoginCustom extends Login
         return new HtmlString('
         <div class="flex flex-col items-center space-y-4">
             <h1 class="text-2xl font-bold text-center">
-                Selamat Datang <br> di Aplikasi SITANHOR Polri <br> Polda Jawa Tengah
+                Selamat Datang <br> di Aplikasi SITANHOR<br> Polda Jawa Tengah
             </h1>
         </div>
         ');

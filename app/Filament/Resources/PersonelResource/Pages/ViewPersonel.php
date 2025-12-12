@@ -15,21 +15,6 @@ class ViewPersonel extends ViewRecord
 
     protected static ?string $title = 'Profil';
 
-    public function getHeading(): string
-    {
-        $user = auth()->user();
-        
-        // Pastikan user login sebelum mengecek role
-        if ($user && $user->hasRole('personel')) {
-            return 'Profil Saya';
-        }
-
-        // Untuk role lain (bagwatpers, renmin) atau jika role 'personel' tidak memiliki data
-        return 'Profil';
-    }
-
-
-
     protected function getHeaderActions(): array
     {
         return [

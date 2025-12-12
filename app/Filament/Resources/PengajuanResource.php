@@ -62,7 +62,33 @@ class PengajuanResource extends Resource
                             ->latest('tahun')
                             ->value('tahun')
                     )
-                    ->required(),
+                    ->required()
+                    ->rules([
+                        function (Forms\Get $get) {
+                            return function (string $attribute, $value, $fail) use ($get) {
+
+                                $user = auth()->user();
+                                $personelNrp = $user->personel->nrp ?? null;
+                                $record = $get('__record'); // abaikan saat edit
+
+                                if (!$personelNrp || !$value) {
+                                    return;
+                                }
+
+                                // cek apakah sudah ada pengajuan di periode ini
+                                $exists = \App\Models\Pengajuan::where('personel_nrp', $personelNrp)
+                                    ->where('periode_tahun', $value)
+                                    ->whereNotIn('status', ['Ditolak', 'Menunggu Verifikasi'])
+                                    ->when($record, fn($q) => $q->where('id', '!=', $record->id)) // abaikan record sendiri
+                                    ->exists();
+
+                                if ($exists) {
+                                    $fail("Anda hanya dapat mengajukan 1 kali pada periode tahun {$value}.");
+                                }
+                            };
+                        },
+                    ]),
+
                 Forms\Components\Select::make('kategori_kode_kategori')
                     ->label('Tanda Kehormatan')
                     ->relationship('kategori', 'nama_kategori') // tampilkan nama_kategori di dropdown
@@ -73,7 +99,7 @@ class PengajuanResource extends Resource
                     ->rules([
                         function (Forms\Get $get, $state) {
                             return function (string $attribute, $value, $fail) use ($get, $state) {
-                                
+
                                 $user = auth()->user();
                                 $personelNrp = $user->personel->nrp ?? null;
                                 $periodeTahun = $get('periode_tahun');
@@ -86,7 +112,7 @@ class PengajuanResource extends Resource
                                 $kategori = Kategori::where('kode_kategori', $state)->first();
 
                                 if (!$personel || !$kategori) {
-                                    return; 
+                                    return;
                                 }
 
                                 // --- Pengecekan 1: Syarat Masa Dinas ---
@@ -104,12 +130,12 @@ class PengajuanResource extends Resource
                                 $exists = Pengajuan::where('personel_nrp', $personelNrp)
                                     ->where('periode_tahun', $periodeTahun)
                                     ->where('kategori_kode_kategori', $value)
-                                    // Boleh mengajukan lagi jika statusnya Ditolak
-                                    ->whereNotIn('status', ['Ditolak']) 
+                                    // Boleh mengajukan lagi jika statusnya Ditolak dan Menunggu Verifikasi
+                                    ->whereNotIn('status', ['Ditolak', 'Menunggu Verifikasi'])
                                     ->exists();
 
                                 if ($exists) {
-                                    $fail('Anda sudah memiliki pengajuan yang sedang diproses/telah disetujui untuk kategori ini pada periode yang sama.');
+                                    $fail('Anda sudah memiliki pengajuan yang sedang diproses/telah disetujui untuk tanda kehormatan ini');
                                 }
                             };
                         },
@@ -215,102 +241,7 @@ class PengajuanResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('personel_nrp')
-                    ->label('NRP')
-                    ->searchable()
-                    ->visible(function (): bool {
-                        $user = Auth::user();
-                        // Filter terlihat jika user adalah bagwatpers ATAU renmin
-                        return $user && ($user->hasRole('bagwatpers') || $user->hasRole('renmin'));
-                    }),
-                Tables\Columns\TextColumn::make('personel.user.name')
-                    ->label('Nama')
-                    ->sortable()
-                    ->searchable()->visible(function (): bool {
-                        $user = Auth::user();
-                        // Filter terlihat jika user adalah bagwatpers ATAU renmin
-                        return $user && ($user->hasRole('bagwatpers') || $user->hasRole('renmin'));
-                    })
-                    ->wrap()
-                    ->extraHeaderAttributes([
-                        'style' => 'width: 200px;' 
-                    ])
-                    ->extraAttributes([
-                        'style' => 'width: 200px;' 
-                    ]),
-                Tables\Columns\TextColumn::make('periode_tahun')
-                    ->label('Periode')
-                    ->alignment('center')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('kategori.nama_kategori')
-                    ->label('Tanda Kehormatan')
-                    ->searchable()
-                    ->sortable()
-                    ->alignCenter()
-                    ->wrap()
-                    ->extraHeaderAttributes([
-                        'style' => 'width: 200px;' // Atur lebar maksimum header kolom
-                    ])
-                    ->extraAttributes([
-                        'style' => 'width: 200px;' // Atur lebar maksimum sel data
-                    ]),
-                Tables\Columns\TextColumn::make('surat_tanda_kehormatan')
-                    ->label('Nomor dan Tanggal Keppres')
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('tanggal_pengajuan')
-                    ->label('Tanggal Pengajuan')
-                    ->alignCenter()
-                    ->date('d-m-Y')
-                    ->sortable(),
-                // Tables\Columns\TextColumn::make('sk_tmt')
-                //     ->label('SK TMT Pertama')
-                //     ->visible(fn ($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']))
-                //     ->url(fn ($record) => asset('storage/' . $record->sk_tmt)) // arahkan ke lokasi file di public/storage
-                //     ->openUrlInNewTab() // buka di tab baru
-                //     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
-                // Tables\Columns\TextColumn::make('sk_pangkat')
-                //     ->label('SK Pangkat Terakhir')
-                //     ->visible(fn ($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']))
-                //     ->url(fn ($record) => asset('storage/' . $record->sk_pangkat)) // arahkan ke lokasi file di public/storage
-                //     ->openUrlInNewTab() // buka di tab baru
-                //     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
-                // Tables\Columns\TextColumn::make('sk_jabatan')
-                //     ->label('SK Jabatan Terakhir')
-                //     ->visible(fn ($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']))
-                //     ->url(fn ($record) => asset('storage/' . $record->sk_jabatan)) // arahkan ke lokasi file di public/storage
-                //     ->openUrlInNewTab() // buka di tab baru
-                //     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
-                // Tables\Columns\TextColumn::make('drh')
-                //     ->label('Daftar Riwayat Hidup')
-                //     ->visible(fn ($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']))
-                //     ->url(fn ($record) => asset('storage/' . $record->drh)) // arahkan ke lokasi file di public/storage
-                //     ->openUrlInNewTab() // buka di tab baru
-                //     ->formatStateUsing(fn ($state) => '📄 Lihat Surat'),
-                Tables\Columns\TextColumn::make('status')
-                    ->badge() // tampil sebagai badge warna
-                    ->color(fn (string $state): string => match ($state) {
-                        'Menunggu Verifikasi' => 'warning',   // kuning
-                        'Ditolak'             => 'danger',    // merah
-                        'Terverifikasi'       => 'success',    // hijau
-                        'Proses Pengajuan'    => 'info',   // biru
-                        'Selesai'             => 'gray',   // abu
-                        default               => 'gray',
-                    })
-                    ->formatStateUsing(fn (string $state) => ucfirst($state)),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
+
             ->emptyStateHeading('Tidak Ada Data Pengajuan')
             ->filters([
                 Tables\Filters\TrashedFilter::make()->label('Data yang Dihapus'),
@@ -349,7 +280,12 @@ class PengajuanResource extends Resource
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->button()
-                    ->visible(fn($record) => auth()->user()->hasRole(['renmin', 'bagwatpers']) && $record->status === 'Menunggu Verifikasi')
+                    ->visible(
+                        fn($record, $livewire) =>
+                        $livewire->getActiveTab()?->getId() !== 'all' &&
+                            auth()->user()->hasRole(['renmin', 'bagwatpers']) &&
+                            $record->status === 'Menunggu Verifikasi'
+                    )
                     ->requiresConfirmation()
                     ->action(function (Pengajuan $record) {
                         $record->update(['status' => 'Terverifikasi']);
@@ -451,7 +387,7 @@ class PengajuanResource extends Resource
                         ->label('Verifikasi Terpilih')
                         ->icon('heroicon-o-check-badge')
                         ->color('success')
-                        ->visible(fn() => auth()->user()->hasRole(['renmin', 'bagwatpers']))
+                        ->visible(fn() => auth()->user()->hasRole(['bagwatpers']))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
                             if ($records->contains(fn($record) => $record->status !== 'Menunggu Verifikasi')) {
@@ -546,11 +482,11 @@ class PengajuanResource extends Resource
 
         // Role PERSONEL → hanya lihat pengajuan miliknya sendiri
         if ($user->hasRole('personel')) {
-            $nrp = $user->personel->nrp ?? null;
+            $email = $user->email;
 
-            if ($nrp) {
-                $query->where('personel_nrp', $nrp);
-            }
+    $query->whereHas('personel.user', function ($q) use ($email) {
+        $q->where('email', $email);
+    });
         }
 
         return $query;

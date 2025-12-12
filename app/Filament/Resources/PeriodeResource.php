@@ -51,7 +51,8 @@ class PeriodeResource extends Resource
                         'tutup' => 'Tutup',
                     ])
                     ->required(),
-            ]);
+            ])
+            ->columns(1);;
     }
 
     public static function table(Table $table): Table
@@ -78,14 +79,14 @@ class PeriodeResource extends Resource
                         default               => 'gray',
                     })
                     ->alignCenter(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('created_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('updated_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

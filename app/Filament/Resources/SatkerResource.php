@@ -48,7 +48,8 @@ class SatkerResource extends Resource
                 Forms\Components\TextInput::make('deskripsi')
                     ->required()
                     ->maxLength(255),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -58,7 +59,14 @@ class SatkerResource extends Resource
                 Tables\Columns\TextColumn::make('kode_satker')
                     ->label('Kode')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->wrap()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 20px;' 
+                    ])
+                    ->extraAttributes([
+                        'style' => 'width: 20px;' 
+                    ]),
                 Tables\Columns\TextColumn::make('nama_satker')
                     ->label('Nama Satuan Kerja')
                     ->searchable()
@@ -68,34 +76,35 @@ class SatkerResource extends Resource
                     ])
                     ->extraAttributes([
                         'style' => 'width: 250px;' 
-                    ]),
+                    ])
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('user_email')
                     ->label('Akun')
                     ->searchable()
                     ->wrap()
                     ->extraHeaderAttributes([
-                        'style' => 'width: 300px;' 
+                        'style' => 'width: 200px;' 
                     ])
                     ->extraAttributes([
-                        'style' => 'width: 300px;' 
+                        'style' => 'width: 200px;' 
                     ]),
                 Tables\Columns\TextColumn::make('deskripsi')
                     ->searchable()
                     ->wrap()
                     ->extraHeaderAttributes([
-                        'style' => 'width: 300px;' 
+                        'style' => 'width: 350px;' 
                     ])
                     ->extraAttributes([
-                        'style' => 'width: 300px;' 
+                        'style' => 'width: 350px;' 
                     ]),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('created_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('updated_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
